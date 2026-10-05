@@ -4,6 +4,7 @@ import { CreditCard } from 'lucide-react';
 import { useBillingQuery } from '@/store/api';
 import { ErrorNote, PageHeader, StatusPill } from '@/components/ui';
 import { PlanPill, UsageBar } from '@/components/PlanUsage';
+import BuyPlans from '@/components/BuyPlans';
 import { chats, fmtDate, money } from '@/lib/format';
 
 export default function BillingPage() {
@@ -14,7 +15,7 @@ export default function BillingPage() {
   const now = Date.now();
   return (
     <>
-      <PageHeader icon={CreditCard} tone="orange" title="Plan & usage" description="Plans are activated and renewed by your administrator." />
+      <PageHeader icon={CreditCard} tone="orange" title="Plan & usage" description="Your plan, what you have used, and buying or renewing online." />
       <div className="grid gap-6 lg:grid-cols-3">
         <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line lg:col-span-2" aria-labelledby="cur">
           <div className="bg-gradient-to-r from-c-orange to-c-pink px-5 py-5 text-white">
@@ -36,6 +37,7 @@ export default function BillingPage() {
           <Link href="/pricing" className="btn-secondary w-full">See all plans</Link>
         </section>
       </div>
+      <BuyPlans renewing={s.active && !!s.endsAt} />
       <section className="card mt-6 overflow-x-auto" aria-labelledby="hist">
         <h2 id="hist" className="px-5 pt-5 font-display text-lg font-semibold text-navy">History</h2>
         {!data.history.length ? <p className="p-5 text-sm text-muted">No plans yet.</p> : (

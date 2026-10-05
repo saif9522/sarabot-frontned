@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { AlertTriangle, BadgeIndianRupee, Building2, CircleCheck, CircleSlash, Gauge } from 'lucide-react';
+import { AlertTriangle, ArrowDownLeft, ArrowUpRight, BadgeIndianRupee, Building2, CircleCheck, CircleSlash, Gauge, IdCard, Smartphone } from 'lucide-react';
 import { useAdminOverviewQuery } from '@/store/api';
 import { ErrorNote, PageHeader, Tone, toneClass } from '@/components/ui';
 import { fmtDate, money } from '@/lib/format';
@@ -12,7 +12,11 @@ export default function AdminOverview() {
     { label: 'Customers', value: d.customers, tone: 'blue', icon: Building2, href: '/admin/customers' },
     { label: 'On an active plan', value: d.paying, tone: 'green', icon: CircleCheck },
     { label: 'Without a plan', value: d.withoutPlan, tone: 'orange', icon: CircleSlash },
-    { label: 'Collected this month', value: d.revenueThisMonth.length ? d.revenueThisMonth.map((r) => money(r.amount, r.currency)).join(' + ') : money(0), tone: 'pink', icon: BadgeIndianRupee },
+    { label: 'Collected this month', value: d.revenueThisMonth.length ? d.revenueThisMonth.map((r) => money(r.amount, r.currency)).join(' + ') : money(0), tone: 'pink', icon: BadgeIndianRupee, href: '/admin/payments' },
+    { label: `Team: ${d.people.owners} owners · ${d.people.admins} admins`, value: d.people.agents + ' agents', tone: 'violet', icon: IdCard, href: '/admin/users' },
+    { label: 'WhatsApp numbers connected', value: `${d.numbers.connected}/${d.numbers.total}`, tone: 'sky', icon: Smartphone },
+    { label: 'Messages received today', value: d.today.received, tone: 'amber', icon: ArrowDownLeft },
+    { label: `Bot replies today · ${d.subscribers.toLocaleString('en-IN')} subscribers`, value: d.today.botReplies, tone: 'indigo', icon: ArrowUpRight },
   ] : [];
   return (
     <>

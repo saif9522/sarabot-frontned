@@ -1,5 +1,5 @@
 import { BaseQueryFn, FetchArgs, FetchBaseQueryError, createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { Account, AdminOverview, Bot, Category, Contact, Customer, CustomerDetail, Dashboard, Decision, Flow, Me, Message, Plan, PlanStatus, Product, Subscription, TeamUser } from '@/lib/types';
+import type { Account, AdminOverview, Bot, Category, Contact, Customer, CustomerDetail, Dashboard, Decision, Flow, Me, Message, Payment, Plan, PlanStatus, PlatformSetting, PlatformUser, Product, Subscription, TeamUser } from '@/lib/types';
 import { API_URL } from '@/lib/format';
 
 const raw = fetchBaseQuery({ baseUrl: API_URL, credentials: 'include' });
@@ -22,7 +22,7 @@ export function errorText(e: unknown, fallback = 'Something went wrong. Try agai
 export const api = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['Me', 'Admin', 'Plans', 'Customers', 'Customer', 'Team', 'Billing', 'Dashboard', 'Accounts', 'Bots', 'Bot', 'Chats', 'Thread', 'Subscribers', 'Products', 'Categories'],
+  tagTypes: ['Me', 'Users', 'Payments', 'Settings', 'Admin', 'Plans', 'Customers', 'Customer', 'Team', 'Billing', 'Dashboard', 'Accounts', 'Bots', 'Bot', 'Chats', 'Thread', 'Subscribers', 'Products', 'Categories'],
   endpoints: (b) => ({
     me: b.query<Me, void>({ query: () => 'auth/me', providesTags: ['Me'] }),
     login: b.mutation<{ ok: true; role: string }, { email: string; password: string }>({ query: (body) => ({ url: 'auth/login', method: 'POST', body }) }),
@@ -69,6 +69,14 @@ export const api = createApi({
       query: ({ subId, action, days, chats }) => ({ url: `admin/subscriptions/${subId}/${action}`, method: 'POST', body: { days, chats } }),
       invalidatesTags: (_r, _e, { customerId }) => ['Customers', 'Admin', { type: 'Customer', id: customerId }],
     }),
+    platformUsers: b.query<PlatformUser[], { q?: string; role?: string; status?: string }>({ query: (params) => ({ url: 'admin/users', params }), providesTags: ['Users'] }),
+    updateUser: b.mutation<unknown, { id: string; active?: boolean; role?: string; name?: string; mobile?: string }>({
+      query: ({ id, ...body }) => ({ url: `admin/users/${id}`, method: 'PATCH', body }), invalidatesTags: ['Users', 'Customer', 'Customers', 'Admin'],
+    }),
+    deleteUser: b.mutation<unknown, string>({ query: (id) => ({ url: `admin/users/${id}`, method: 'DELETE' }), invalidatesTags: ['Users', 'Customer', 'Customers', 'Admin'] }),
+    adminPayments: b.query<Payment[], { status?: string }>({ query: (params) => ({ url: 'admin/payments', params }), providesTags: ['Payments'] }),
+    platformSettings: b.query<PlatformSetting[], void>({ query: () => 'admin/settings', providesTags: ['Settings'] }),
+    savePlatformSettings: b.mutation<PlatformSetting[], Record<string, string>>({ query: (body) => ({ url: 'admin/settings', method: 'PATCH', body }), invalidatesTags: ['Settings', 'Bots', 'Dashboard'] }),
     actAs: b.mutation<unknown, string>({ query: (id) => ({ url: `admin/act-as/${id}`, method: 'POST' }) }),
     exitActAs: b.mutation<unknown, void>({ query: () => ({ url: 'admin/act-as-exit', method: 'POST' }) }),
 
@@ -83,6 +91,12 @@ export const api = createApi({
     team: b.query<Array<{ id: string; name: string; role: string }>, void>({ query: () => 'team', providesTags: ['Team'] }),
     billing: b.query<{ status: PlanStatus; history: Subscription[]; numbersUsed: number; agentsUsed: number }, void>({ query: () => 'billing', providesTags: ['Billing'] }),
     publicPlans: b.query<Plan[], void>({ query: () => 'plans' }),
+    paymentOptions: b.query<{ enabled: boolean; keyId: string | null; plans: Plan[]; prefill: { name: string; email: string }; business: string }, void>({ query: () => 'payments/options' }),
+    createOrder: b.mutation<{ orderId: string; amount: number; currency: string; keyId: string; planName: string }, string>({ query: (planId) => ({ url: 'payments/order', method: 'POST', body: { planId } }) }),
+    verifyPayment: b.mutation<{ ok: true }, { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }>({
+      query: (body) => ({ url: 'payments/verify', method: 'POST', body }), invalidatesTags: ['Billing', 'Me', 'Dashboard', 'Payments'],
+    }),
+    myPayments: b.query<Payment[], void>({ query: () => 'payments', providesTags: ['Payments'] }),
 
     dashboard: b.query<Dashboard, { from?: string; to?: string }>({ query: (params) => ({ url: 'dashboard', params }), providesTags: ['Dashboard'] }),
 
@@ -164,6 +178,8 @@ export const {
   useAdminOverviewQuery, useAdminPlansQuery, useSavePlanMutation, useDeletePlanMutation, useCustomersQuery, useCustomerQuery,
   useAddCustomerMutation, useUpdateCustomerMutation, useDeleteCustomerMutation, useAddOwnerMutation, useResetPasswordMutation,
   useActivatePlanMutation, useSubActionMutation, useActAsMutation, useExitActAsMutation,
+  usePlatformUsersQuery, useUpdateUserMutation, useDeleteUserMutation, useAdminPaymentsQuery, usePlatformSettingsQuery, useSavePlatformSettingsMutation,
+  usePaymentOptionsQuery, useCreateOrderMutation, useVerifyPaymentMutation, useMyPaymentsQuery,
   useAgentsQuery, useSaveAgentMutation, useDeleteAgentMutation, useTeamSettingsMutation, useTeamQuery, useBillingQuery, usePublicPlansQuery,
   useDashboardQuery, useAccountsQuery, useAddAccountMutation, useLinkAccountMutation, useUnlinkAccountMutation, useUpdateAccountMutation, useDeleteAccountMutation,
   useBotsQuery, useBotQuery, useAddBotMutation, useUpdateBotMutation, useDeleteBotMutation, useSaveFlowMutation, useToggleFlowMutation, useDuplicateFlowMutation, useDeleteFlowMutation, useUploadMutation, useTestBotMutation,

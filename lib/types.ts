@@ -78,16 +78,32 @@ export interface TeamUser {
 }
 export interface Customer {
   id: string; name: string; status: 'active' | 'suspended'; notes: string; createdAt: string; autoAssign: boolean;
-  users: Array<{ id: string; name: string; email: string; mobile: string; lastLoginAt: string | null; role?: Role; active?: boolean; createdAt?: string }>;
+  users: Array<{ id: string; name: string; email: string; mobile: string; lastLoginAt: string | null; role?: Role; active?: boolean; seeUnassigned?: boolean; createdAt?: string; _count?: { assigned: number } }>;
   _count?: { accounts: number; users: number; bots?: number; products?: number };
   plan: PlanStatus;
 }
+export interface Payment {
+  id: string; workspaceId: string; planName: string; amount: number; currency: string; status: 'created' | 'paid' | 'failed';
+  razorpayOrderId: string; razorpayPaymentId: string | null; paidBy: string; createdAt: string; paidAt: string | null;
+  workspace?: { id: string; name: string };
+}
+export interface PlatformUser {
+  id: string; name: string; email: string; mobile: string; role: Role; active: boolean; seeUnassigned: boolean;
+  createdAt: string; lastLoginAt: string | null; workspace: { id: string; name: string; status: string } | null; _count: { assigned: number };
+}
+export interface PlatformSetting { key: string; label: string; secret: boolean; source: 'dashboard' | 'env' | 'unset'; value: string }
 export interface CustomerDetail extends Customer {
   subscriptions: Subscription[];
+  payments: Payment[];
+  stats: { subscribers: number; messages: number; botReplies: number };
   accounts: Array<{ id: string; label: string; phone: string | null; status: SessionStatus }>;
 }
 export interface AdminOverview {
   customers: number; suspended: number; paying: number; withoutPlan: number; activePlans: number;
+  people: { owners: number; admins: number; agents: number };
+  numbers: { total: number; connected: number };
+  subscribers: number;
+  today: { received: number; botReplies: number; payments: number };
   revenueThisMonth: Array<{ currency: string; amount: number }>;
   expiringSoon: Array<{ workspaceId: string; name: string; planName: string; endsAt: string }>;
 }

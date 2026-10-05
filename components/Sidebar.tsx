@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { BadgeIndianRupee, Bot, Building2, CreditCard, Gauge, LayoutGrid, Menu, MessagesSquare, Package, Smartphone, UserCog, Users, X } from 'lucide-react';
+import { BadgeIndianRupee, Bot, Building2, CreditCard, Gauge, IdCard, ReceiptIndianRupee, SlidersHorizontal, LayoutGrid, Menu, MessagesSquare, Package, Smartphone, UserCog, Users, X } from 'lucide-react';
 import { useDashboardQuery, useMeQuery } from '@/store/api';
 import { useLive } from '@/app/providers';
 import type { Role } from '@/lib/types';
@@ -26,7 +26,10 @@ const ADMIN: Array<{ title: string | null; items: Item[] }> = [
   { title: 'Super Admin', items: [
     { href: '/admin', label: 'Overview', icon: Gauge, tone: 'indigo' },
     { href: '/admin/customers', label: 'Customers', icon: Building2, tone: 'green' },
+    { href: '/admin/users', label: 'Users & agents', icon: IdCard, tone: 'blue' },
     { href: '/admin/plans', label: 'Plans', icon: BadgeIndianRupee, tone: 'violet' },
+    { href: '/admin/payments', label: 'Payments', icon: ReceiptIndianRupee, tone: 'pink' },
+    { href: '/admin/settings', label: 'Platform settings', icon: SlidersHorizontal, tone: 'amber' },
   ] },
 ];
 

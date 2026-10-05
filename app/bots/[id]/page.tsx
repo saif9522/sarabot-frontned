@@ -25,7 +25,7 @@ function SettingsTab({ bot }: { bot: Bot }) {
         <div className="flex items-center gap-3"><Switch checked={f.aiEnabled} onChange={(v) => setF({ ...f, aiEnabled: v })} label="AI replies" /><span className="text-sm">AI answers when no flow matches</span></div>
         <div className="flex items-center gap-3"><Switch checked={f.useProducts} onChange={(v) => setF({ ...f, useProducts: v })} label="Use products" /><span className="text-sm">AI may answer from the product list</span></div>
       </div>
-      {!bot.aiAvailable && f.aiEnabled && <p className="text-sm text-tech">The server has no GEMINI_API_KEY, so instead of AI the &ldquo;No match&rdquo; flow or fallback message is used.</p>}
+      {!bot.aiAvailable && f.aiEnabled && <p className="text-sm text-tech">No Gemini API key is set (Super Admin → Platform settings), so instead of AI the &ldquo;No match&rdquo; flow or fallback message is used.</p>}
       <div>
         <label htmlFor="b-ins" className="label">Instructions for the AI</label>
         <textarea id="b-ins" className="textarea" maxLength={4000} value={f.instructions} onChange={(e) => setF({ ...f, instructions: e.target.value })}

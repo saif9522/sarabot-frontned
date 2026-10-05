@@ -25,7 +25,7 @@ export default function BotsPage() {
         actions={<button className="btn-primary" onClick={() => setOpen(true)}><Plus className="h-4 w-4" aria-hidden /> New bot</button>} />
       {data && !data.aiAvailable && (
         <div className="card mb-4 border-tech-edge bg-tech-tint p-4 text-sm text-tech">
-          AI replies are off because <code className="font-mono">GEMINI_API_KEY</code> isn&apos;t set in <code className="font-mono">backend/.env</code>. Flows and fallback messages still work.
+          AI replies are off: no Gemini API key is set yet (Super Admin → Platform settings, or GEMINI_API_KEY in backend/.env). Flows and fallback messages still work.
         </div>
       )}
       {isError ? <ErrorNote what="bots" /> : isLoading ? <p className="text-muted">Loading…</p> : !data?.bots.length ? (

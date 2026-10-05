@@ -5,10 +5,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Building2, Eye, KeyRound } from 'lucide-react';
 import {
   api, errorText, useActAsMutation, useActivatePlanMutation, useAddOwnerMutation, useAdminPlansQuery, useCustomerQuery, useDeleteCustomerMutation,
-  useResetPasswordMutation, useSubActionMutation, useUpdateCustomerMutation,
+  useResetPasswordMutation, useSubActionMutation, useUpdateCustomerMutation, useUpdateUserMutation,
 } from '@/store/api';
 import { useAppDispatch } from '@/store/store';
-import { ErrorNote, Modal, PageHeader, StatusPill } from '@/components/ui';
+import { ErrorNote, Modal, PageHeader, StatusPill, Switch } from '@/components/ui';
 import { PlanPill, UsageBar } from '@/components/PlanUsage';
 import { chats, duration, fmtDate, money, phone, timeAgo } from '@/lib/format';
 
@@ -70,6 +70,7 @@ export default function CustomerPage() {
   const [actAs] = useActAsMutation();
   const [addOwner, { isLoading: addingOwner, error: ownerErr }] = useAddOwnerMutation();
   const [resetPw] = useResetPasswordMutation();
+  const [updateUser] = useUpdateUserMutation();
   const [activating, setActivating] = useState(false);
   const [ownerForm, setOwnerForm] = useState<{ name: string; email: string; password: string } | null>(null);
   const dispatch = useAppDispatch();
@@ -108,6 +109,8 @@ export default function CustomerPage() {
         <section className="card p-5" aria-labelledby="acc">
           <h2 id="acc" className="font-display text-lg font-semibold text-navy">Account</h2>
           <p className="mt-2 text-sm text-muted">{c.accounts.length} number{c.accounts.length === 1 ? '' : 's'} · {c._count?.bots ?? 0} bots · {c._count?.products ?? 0} products</p>
+          <p className="mt-1 text-sm text-muted">{c.stats.subscribers.toLocaleString('en-IN')} subscribers · {c.stats.messages.toLocaleString('en-IN')} messages · {c.stats.botReplies.toLocaleString('en-IN')} bot replies</p>
+          {c.notes && <p className="mt-2 rounded-lg bg-canvas p-2 text-xs text-muted">{c.notes}</p>}
           <ul className="mt-2 space-y-1 text-sm">{c.accounts.map((a) => <li key={a.id} className="flex justify-between gap-2"><span>{a.phone ? phone(a.phone) : a.label}</span><StatusPill tone={a.status === 'connected' ? 'ok' : 'off'}>{a.status === 'connected' ? 'Connected' : 'Disconnected'}</StatusPill></li>)}</ul>
           <div className="mt-4 flex flex-wrap gap-2">
             <button className={c.status === 'active' ? 'btn-danger btn-sm' : 'btn-primary btn-sm'}
@@ -152,23 +155,60 @@ export default function CustomerPage() {
         )}
       </section>
 
-      <section className="card mt-6 p-5" aria-labelledby="users">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="users" className="font-display text-lg font-semibold text-navy">Logins</h2>
+      <section className="card mt-6 overflow-x-auto" aria-labelledby="users">
+        <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5">
+          <h2 id="users" className="font-display text-lg font-semibold text-navy">Team ({c.users.length})</h2>
           <button className="btn-secondary btn-sm" onClick={() => setOwnerForm({ name: '', email: '', password: '' })}>Add owner login</button>
         </div>
-        <ul className="mt-3 divide-y divide-slate-100">
-          {c.users.map((u) => (
-            <li key={u.id} className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm">
-              <span><b>{u.name}</b> <span className="text-muted">· {u.email} · {u.role}{u.active === false ? ' · disabled' : ''} · last sign-in {timeAgo(u.lastLoginAt)}</span></span>
-              <button className="btn-secondary btn-sm" onClick={async () => {
-                const pw = prompt(`New password for ${u.email} (8+ characters):`);
-                if (pw && pw.length >= 8) { await resetPw({ userId: u.id, password: pw }).unwrap(); alert('Password changed. Share it privately.'); }
-                else if (pw) alert('Password must be at least 8 characters.');
-              }}><KeyRound className="h-3.5 w-3.5" aria-hidden /> Reset password</button>
-            </li>
-          ))}
-        </ul>
+        <table className="mt-3 w-full min-w-[900px] text-left text-sm">
+          <thead className="text-xs"><tr><th className="px-5 py-3 font-semibold">Person</th><th className="px-5 py-3 font-semibold">Mobile</th><th className="px-5 py-3 font-semibold">Role</th><th className="px-5 py-3 font-semibold">Chats</th><th className="px-5 py-3 font-semibold">Added</th><th className="px-5 py-3 font-semibold">Last sign-in</th><th className="px-5 py-3 font-semibold">Active</th><th className="px-5 py-3"><span className="sr-only">Actions</span></th></tr></thead>
+          <tbody className="divide-y divide-slate-100">
+            {c.users.map((u) => (
+              <tr key={u.id} className={u.active === false ? 'opacity-60' : ''}>
+                <td className="px-5 py-3"><p className="font-semibold text-navy">{u.name}</p><p className="text-xs text-muted">{u.email}</p></td>
+                <td className="px-5 py-3 text-muted">{u.mobile || '—'}</td>
+                <td className="px-5 py-3">
+                  <label className="sr-only" htmlFor={`cr-${u.id}`}>Role of {u.name}</label>
+                  <select id={`cr-${u.id}`} className="input h-8 w-28 text-xs" value={u.role} onChange={(e) => updateUser({ id: u.id, role: e.target.value })}>
+                    <option value="owner">Owner</option><option value="admin">Admin</option><option value="agent">Agent</option>
+                  </select>
+                  {u.role === 'agent' && <p className="mt-1 text-[11px] text-muted">{u.seeUnassigned ? 'Sees unassigned' : 'Assigned only'}</p>}
+                </td>
+                <td className="px-5 py-3 tabular-nums">{u._count?.assigned ?? 0}</td>
+                <td className="px-5 py-3 text-muted">{fmtDate(u.createdAt ?? null)}</td>
+                <td className="px-5 py-3 text-muted">{timeAgo(u.lastLoginAt)}</td>
+                <td className="px-5 py-3"><Switch checked={u.active !== false} label={`${u.name} active`} onChange={(v) => updateUser({ id: u.id, active: v })} /></td>
+                <td className="whitespace-nowrap px-5 py-3 text-right">
+                  <button className="btn-secondary btn-sm" onClick={async () => {
+                    const pw = prompt(`New password for ${u.email} (8+ characters):`);
+                    if (pw && pw.length >= 8) { await resetPw({ userId: u.id, password: pw }).unwrap(); alert('Password changed. Share it privately.'); }
+                    else if (pw) alert('Password must be at least 8 characters.');
+                  }}><KeyRound className="h-3.5 w-3.5" aria-hidden /> Reset password</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="card mt-6 overflow-x-auto" aria-labelledby="pays">
+        <h2 id="pays" className="px-5 pt-5 font-display text-lg font-semibold text-navy">Online payments</h2>
+        {!c.payments.length ? <p className="p-5 text-sm text-muted">No online payments yet.</p> : (
+          <table className="mt-3 w-full min-w-[700px] text-left text-sm">
+            <thead className="text-xs"><tr><th className="px-5 py-3 font-semibold">Date</th><th className="px-5 py-3 font-semibold">Plan</th><th className="px-5 py-3 text-right font-semibold">Amount</th><th className="px-5 py-3 font-semibold">Status</th><th className="px-5 py-3 font-semibold">Razorpay ID</th></tr></thead>
+            <tbody className="divide-y divide-slate-100">
+              {c.payments.map((p) => (
+                <tr key={p.id}>
+                  <td className="px-5 py-3">{fmtDate(p.paidAt ?? p.createdAt)}</td>
+                  <td className="px-5 py-3">{p.planName}</td>
+                  <td className="px-5 py-3 text-right tabular-nums">{money(p.amount / 100, p.currency)}</td>
+                  <td className="px-5 py-3"><StatusPill tone={p.status === 'paid' ? 'ok' : p.status === 'failed' ? 'off' : 'busy'}>{p.status === 'paid' ? 'Paid' : p.status === 'failed' ? 'Failed' : 'Not paid'}</StatusPill></td>
+                  <td className="px-5 py-3 font-mono text-xs text-muted">{p.razorpayPaymentId ?? p.razorpayOrderId}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
 
       {activating && <ActivateModal customerId={id} onClose={() => setActivating(false)} />}

@@ -158,7 +158,7 @@ export default function Dashboard() {
         </section>
       )}
       {d && !d.aiAvailable && (
-        <p className="mt-6 flex items-center gap-2 text-sm text-muted"><UserRound className="h-4 w-4" aria-hidden /> AI replies are off (no <code className="font-mono">GEMINI_API_KEY</code> in <code className="font-mono">backend/.env</code>). Flows and fallback messages still work.</p>
+        <p className="mt-6 flex items-center gap-2 text-sm text-muted"><UserRound className="h-4 w-4" aria-hidden /> AI replies are off: no Gemini API key yet (Super Admin → Platform settings). Flows and fallback messages still work.</p>
       )}
     </>
   );
