@@ -78,10 +78,15 @@ function PlanBanner() {
     const why = { none: 'No plan is active yet', expired: `Your plan expired on ${fmtDate(p.endsAt)}`, used_up: `All ${p.chatLimit?.toLocaleString('en-IN')} chats in your plan are used`, suspended: 'This account is suspended' }[p.reason ?? 'none'];
     text = <><b>{why}.</b> The bot is not replying automatically; you can still reply yourself. {manager && 'Contact your administrator to activate a plan.'}</>;
     tone = 'bg-err-tint text-err ring-err-edge';
-  } else if (p.daysLeft !== null && p.daysLeft <= 5 && !p.upcoming) {
-    text = <><b>Your plan ends in {p.daysLeft} day{p.daysLeft === 1 ? '' : 's'}</b> ({fmtDate(p.endsAt)}). {manager && 'Contact your administrator to renew.'}</>;
+  } else if (p.daysLeft !== null && p.daysLeft <= 2 && !p.upcoming) {
+    text = <><b>{p.planName} ends {p.daysLeft === 0 ? 'today' : `in ${p.daysLeft} day${p.daysLeft === 1 ? '' : 's'}`}</b> ({fmtDate(p.endsAt)}). After that the bot stops replying. {manager && 'Renew to keep it running.'}</>;
   } else if (p.chatLimit && p.chatsLeft !== null && p.chatsLeft / p.chatLimit < 0.1) {
-    text = <><b>Only {p.chatsLeft.toLocaleString('en-IN')} chats left</b> in your plan.</>;
+    text = <><b>Only {p.chatsLeft.toLocaleString('en-IN')} chats left</b> in {p.planName}.</>;
+  } else {
+    const days = p.daysLeft === null ? '' : ` · ${p.daysLeft} day${p.daysLeft === 1 ? '' : 's'} left (till ${fmtDate(p.endsAt)})`;
+    const left = p.chatsLeft === null ? ' · unlimited chats' : ` · ${p.chatsLeft.toLocaleString('en-IN')} chats left`;
+    text = <><b>✓ {p.planName} is active</b>{days}{left}. The bot is replying automatically.</>;
+    tone = 'bg-c-green-tint text-c-green ring-brand-edge';
   }
   if (!text) return null;
   return (

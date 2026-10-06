@@ -1,65 +1,17 @@
 'use client';
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Building2, Eye, KeyRound } from 'lucide-react';
 import {
-  api, errorText, useActAsMutation, useActivatePlanMutation, useAddOwnerMutation, useAdminPlansQuery, useCustomerQuery, useDeleteCustomerMutation,
+  api, errorText, useActAsMutation, useAddOwnerMutation, useCustomerQuery, useDeleteCustomerMutation,
   useResetPasswordMutation, useSubActionMutation, useUpdateCustomerMutation, useUpdateUserMutation,
 } from '@/store/api';
 import { useAppDispatch } from '@/store/store';
 import { ErrorNote, Modal, PageHeader, StatusPill, Switch } from '@/components/ui';
 import { PlanPill, UsageBar } from '@/components/PlanUsage';
-import { chats, duration, fmtDate, money, phone, timeAgo } from '@/lib/format';
-
-function ActivateModal({ customerId, onClose }: { customerId: string; onClose: () => void }) {
-  const { data: plans } = useAdminPlansQuery();
-  const [activate, { isLoading, error }] = useActivatePlanMutation();
-  const onSale = (plans ?? []).filter((p) => p.active);
-  const [f, setF] = useState({ planId: '', start: 'now' as 'now' | 'after', durationDays: '', amountPaid: '', note: '' });
-  const plan = onSale.find((p) => p.id === f.planId);
-  async function submit(e: FormEvent) {
-    e.preventDefault();
-    await activate({
-      id: customerId, planId: f.planId, start: f.start, note: f.note || undefined,
-      durationDays: f.durationDays ? Number(f.durationDays) : undefined, amountPaid: f.amountPaid !== '' ? Number(f.amountPaid) : undefined,
-    }).unwrap();
-    onClose();
-  }
-  return (
-    <Modal open onClose={onClose} title="Activate a plan" wide>
-      {!onSale.length ? <p className="text-muted">No plans on sale. <Link href="/admin/plans" className="font-semibold text-c-violet underline">Create a plan</Link> first.</p> : (
-        <form onSubmit={submit} className="space-y-4">
-          <fieldset>
-            <legend className="label">Plan</legend>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {onSale.map((p) => (
-                <label key={p.id} className={`flex cursor-pointer gap-3 rounded-xl border p-3 ${f.planId === p.id ? 'border-c-violet bg-c-violet-tint' : 'border-line'}`}>
-                  <input type="radio" name="plan" className="mt-1" required checked={f.planId === p.id} onChange={() => setF({ ...f, planId: p.id, amountPaid: String(p.price) })} />
-                  <span><span className="block font-semibold text-navy">{p.name}</span><span className="text-xs text-muted">{chats(p.chatLimit)} chats · {duration(p.durationDays)} · {money(p.price, p.currency)}</span></span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-          <fieldset>
-            <legend className="label">Starts</legend>
-            <div className="flex flex-wrap gap-4 text-sm">
-              <label className="flex items-center gap-2"><input type="radio" name="start" checked={f.start === 'now'} onChange={() => setF({ ...f, start: 'now' })} /> Today (replaces the current plan)</label>
-              <label className="flex items-center gap-2"><input type="radio" name="start" checked={f.start === 'after'} onChange={() => setF({ ...f, start: 'after' })} /> When the current plan ends (renewal)</label>
-            </div>
-          </fieldset>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div><label htmlFor="a-days" className="label">Days (optional)</label><input id="a-days" type="number" min={1} max={3660} className="input" placeholder={plan ? String(plan.durationDays) : ''} value={f.durationDays} onChange={(e) => setF({ ...f, durationDays: e.target.value })} /></div>
-            <div><label htmlFor="a-paid" className="label">Amount received</label><input id="a-paid" type="number" min={0} step="0.01" className="input" value={f.amountPaid} onChange={(e) => setF({ ...f, amountPaid: e.target.value })} /></div>
-            <div><label htmlFor="a-note" className="label">Note (payment ref.)</label><input id="a-note" className="input" maxLength={500} placeholder="UPI ref, invoice no." value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} /></div>
-          </div>
-          {error && <p className="text-sm text-err">{errorText(error)}</p>}
-          <button className="btn-primary" disabled={isLoading || !f.planId}>{isLoading ? 'Activating…' : 'Activate plan'}</button>
-        </form>
-      )}
-    </Modal>
-  );
-}
+import ActivatePlanModal from '@/components/ActivatePlanModal';
+import { chats, fmtDate, money, phone, timeAgo } from '@/lib/format';
 
 export default function CustomerPage() {
   const { id } = useParams<{ id: string }>();
@@ -211,7 +163,7 @@ export default function CustomerPage() {
         )}
       </section>
 
-      {activating && <ActivateModal customerId={id} onClose={() => setActivating(false)} />}
+      {activating && <ActivatePlanModal customerId={id} onClose={() => setActivating(false)} />}
       <Modal open={!!ownerForm} onClose={() => setOwnerForm(null)} title="Add owner login">
         {ownerForm && (
           <form className="space-y-4" onSubmit={async (e) => { e.preventDefault(); await addOwner({ id, ...ownerForm }).unwrap(); setOwnerForm(null); }}>

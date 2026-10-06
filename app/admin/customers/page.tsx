@@ -2,11 +2,12 @@
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Building2, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Building2, Eye, Pencil, Plus, Trash2, Zap } from 'lucide-react';
 import { errorText, useAddCustomerMutation, useCustomersQuery, useDeleteCustomerMutation, useUpdateCustomerMutation, useUpdateUserMutation } from '@/store/api';
 import type { Customer } from '@/lib/types';
 import { Empty, ErrorNote, Modal, PageHeader, StatusPill } from '@/components/ui';
 import { PlanPill, UsageBar } from '@/components/PlanUsage';
+import ActivatePlanModal from '@/components/ActivatePlanModal';
 
 export default function CustomersPage() {
   const { data, isLoading, isError } = useCustomersQuery();
@@ -20,6 +21,7 @@ export default function CustomersPage() {
   const [delCustomer] = useDeleteCustomerMutation();
   type EditDraft = { id: string; name: string; status: 'active' | 'suspended'; notes: string; ownerId: string | null; ownerName: string; ownerEmail: string; ownerMobile: string };
   const [ed, setEd] = useState<EditDraft | null>(null);
+  const [activateFor, setActivateFor] = useState<string | null>(null);
 
   function openEdit(c: Customer) {
     resetC(); resetO();
@@ -57,7 +59,7 @@ export default function CustomersPage() {
         <Empty title={term ? 'No matches' : 'No customers yet'}>{term ? 'Try another search.' : 'Add a customer to create their login, then activate a plan for them.'}</Empty>
       ) : (
         <div className="card overflow-x-auto">
-          <table className="w-full min-w-[1000px] text-left text-sm">
+          <table className="w-full min-w-[1100px] text-left text-sm">
             <thead className="text-xs"><tr><th className="px-4 py-3 font-semibold">Customer</th><th className="px-4 py-3 font-semibold">Owner</th><th className="px-4 py-3 font-semibold">Plan</th><th className="w-56 px-4 py-3 font-semibold">Chats</th><th className="px-4 py-3 font-semibold">Numbers</th><th className="px-4 py-3 font-semibold">Account</th><th className="px-4 py-3"><span className="sr-only">Actions</span></th></tr></thead>
             <tbody className="divide-y divide-slate-100">
               {rows.map((c) => (
@@ -69,6 +71,7 @@ export default function CustomersPage() {
                   <td className="px-4 py-3">{c._count?.accounts ?? 0}</td>
                   <td className="px-4 py-3"><StatusPill tone={c.status === 'active' ? 'ok' : 'off'}>{c.status === 'active' ? 'Active' : 'Suspended'}</StatusPill></td>
                   <td className="whitespace-nowrap px-4 py-3 text-right">
+                    <button className="mr-1 inline-flex h-8 items-center gap-1 rounded-lg bg-c-violet-tint px-2.5 text-xs font-semibold text-c-violet hover:bg-c-violet hover:text-white" title="Activate plan" onClick={() => setActivateFor(c.id)}><Zap className="h-3.5 w-3.5" aria-hidden />Activate plan</button>
                     <Link href={`/admin/customers/${c.id}`} className="inline-flex rounded p-2 text-muted hover:bg-canvas" title="View" aria-label={`View ${c.name}`}><Eye className="h-4 w-4" /></Link>
                     <button className="rounded p-2 text-muted hover:bg-canvas" title="Edit" aria-label={`Edit ${c.name}`} onClick={() => openEdit(c)}><Pencil className="h-4 w-4" /></button>
                     <button className="rounded p-2 text-muted hover:bg-err-tint hover:text-err" title="Delete" aria-label={`Delete ${c.name}`} onClick={() => remove(c)}><Trash2 className="h-4 w-4" /></button>
@@ -94,6 +97,8 @@ export default function CustomersPage() {
           <button className="btn-primary" disabled={adding}>{adding ? 'Creating…' : 'Create customer'}</button>
         </form>
       </Modal>
+
+      {activateFor && <ActivatePlanModal customerId={activateFor} onClose={() => setActivateFor(null)} />}
 
       <Modal open={!!ed} onClose={() => setEd(null)} title="Edit customer" wide>
         {ed && (
