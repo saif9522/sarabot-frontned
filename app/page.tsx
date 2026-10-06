@@ -9,6 +9,7 @@ import { faqSchema, organizationSchema, softwareSchema, websiteSchema } from '@/
 import Container from '@/components/site/Container';
 import PhoneChat from '@/components/site/PhoneChat';
 import Typewriter from '@/components/site/Typewriter';
+import BusinessMarquee from '@/components/site/BusinessMarquee';
 import { FormArt, InboxArt, QrArt, ReplyArt } from '@/components/site/Visuals';
 
 export const metadata: Metadata = pageMetadata({
@@ -30,8 +31,6 @@ const FAQ = [
 
 /** Rotating words in the hero heading (short enough for one line on phones). */
 const HERO_WORDS = ['online stores', 'grocery shops', 'NGOs', 'clinics', 'restaurants', 'salons', 'your business'];
-
-const BUSINESSES = ['E-commerce stores', 'Grocery and daily-use products', 'NGOs and non-profits', 'Clinics and doctors', 'Coaching centres', 'Salons', 'Restaurants and cafés', 'Pharmacies'];
 
 const ANSWERS = [
   { icon: PackageSearch, title: 'Prices and stock', text: 'From your product list. If something is out of stock, it says so instead of guessing.' },
@@ -99,15 +98,8 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* Who it's for */}
-      <section className="border-b border-line bg-white">
-        <Container className="flex flex-wrap items-center gap-x-6 gap-y-4 py-7">
-          <p className="font-display font-semibold text-navy">Made for</p>
-          <ul className="flex flex-wrap gap-2">
-            {BUSINESSES.map((b) => <li key={b} className="rounded-full bg-canvas px-4 py-2 text-sm text-ink ring-1 ring-line">{b}</li>)}
-          </ul>
-        </Container>
-      </section>
+      {/* Who it's for: colourful strip that keeps moving */}
+      <BusinessMarquee />
 
       {/* What it answers */}
       <section className="bg-white">
