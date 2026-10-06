@@ -72,7 +72,7 @@ export const api = createApi({
       invalidatesTags: (_r, _e, { customerId }) => ['Customers', 'Admin', { type: 'Customer', id: customerId }],
     }),
     platformUsers: b.query<PlatformUser[], { q?: string; role?: string; status?: string }>({ query: (params) => ({ url: 'admin/users', params }), providesTags: ['Users'] }),
-    updateUser: b.mutation<unknown, { id: string; active?: boolean; role?: string; name?: string; mobile?: string }>({
+    updateUser: b.mutation<unknown, { id: string; active?: boolean; role?: string; name?: string; mobile?: string; email?: string }>({
       query: ({ id, ...body }) => ({ url: `admin/users/${id}`, method: 'PATCH', body }), invalidatesTags: ['Users', 'Customer', 'Customers', 'Admin'],
     }),
     deleteUser: b.mutation<unknown, string>({ query: (id) => ({ url: `admin/users/${id}`, method: 'DELETE' }), invalidatesTags: ['Users', 'Customer', 'Customers', 'Admin'] }),
@@ -93,9 +93,10 @@ export const api = createApi({
     team: b.query<Array<{ id: string; name: string; role: string }>, void>({ query: () => 'team', providesTags: ['Team'] }),
     billing: b.query<{ status: PlanStatus; history: Subscription[]; numbersUsed: number; agentsUsed: number }, void>({ query: () => 'billing', providesTags: ['Billing'] }),
     publicPlans: b.query<Plan[], void>({ query: () => 'plans' }),
-    paymentOptions: b.query<{ enabled: boolean; keyId: string | null; plans: Plan[]; prefill: { name: string; email: string }; business: string }, void>({ query: () => 'payments/options' }),
+    paymentOptions: b.query<{ enabled: boolean; keyId: string | null; plans: Plan[]; prefill: { name: string; email: string }; business: string; current: { planId: string | null; planName: string; endsAt: string; price: number } | null }, void>({ query: () => 'payments/options', providesTags: ['Billing'] }),
+    paymentFailed: b.mutation<unknown, string>({ query: (orderId) => ({ url: 'payments/failed', method: 'POST', body: { orderId } }), invalidatesTags: ['Payments'] }),
     createOrder: b.mutation<{ orderId: string; amount: number; currency: string; keyId: string; planName: string }, string>({ query: (planId) => ({ url: 'payments/order', method: 'POST', body: { planId } }) }),
-    verifyPayment: b.mutation<{ ok: true }, { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }>({
+    verifyPayment: b.mutation<{ ok: true; planName: string | null; startsAt: string | null; endsAt: string | null; startsNow: boolean }, { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }>({
       query: (body) => ({ url: 'payments/verify', method: 'POST', body }), invalidatesTags: ['Billing', 'Me', 'Dashboard', 'Payments'],
     }),
     myPayments: b.query<Payment[], void>({ query: () => 'payments', providesTags: ['Payments'] }),
@@ -182,7 +183,7 @@ export const {
   useAddCustomerMutation, useUpdateCustomerMutation, useDeleteCustomerMutation, useAddOwnerMutation, useResetPasswordMutation,
   useActivatePlanMutation, useSubActionMutation, useActAsMutation, useExitActAsMutation,
   usePlatformUsersQuery, useUpdateUserMutation, useDeleteUserMutation, useAdminPaymentsQuery, usePlatformSettingsQuery, useSavePlatformSettingsMutation,
-  usePaymentOptionsQuery, useCreateOrderMutation, useVerifyPaymentMutation, useMyPaymentsQuery,
+  usePaymentOptionsQuery, useCreateOrderMutation, useVerifyPaymentMutation, usePaymentFailedMutation, useMyPaymentsQuery,
   useAgentsQuery, useSaveAgentMutation, useDeleteAgentMutation, useTeamSettingsMutation, useTeamQuery, useBillingQuery, usePublicPlansQuery,
   useDashboardQuery, useAccountsQuery, useAddAccountMutation, useLinkAccountMutation, useUnlinkAccountMutation, useUpdateAccountMutation, useDeleteAccountMutation,
   useBotsQuery, useBotQuery, useAddBotMutation, useUpdateBotMutation, useDeleteBotMutation, useSaveFlowMutation, useToggleFlowMutation, useDuplicateFlowMutation, useDeleteFlowMutation, useUploadMutation, useTestBotMutation,

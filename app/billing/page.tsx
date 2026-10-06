@@ -8,7 +8,7 @@ import BuyPlans from '@/components/BuyPlans';
 import { chats, fmtDate, money } from '@/lib/format';
 
 export default function BillingPage() {
-  const { data, isError } = useBillingQuery(undefined, { pollingInterval: 60000 });
+  const { data, isError } = useBillingQuery(undefined, { pollingInterval: 30000 });
   if (isError) return <ErrorNote what="your plan" />;
   if (!data) return <p className="text-muted">Loading…</p>;
   const s = data.status;
@@ -26,7 +26,7 @@ export default function BillingPage() {
             <PlanPill p={s} />
             {s.planName ? <UsageBar p={s} /> : <p className="text-sm text-muted">You can set up bots and numbers now. The bot starts replying once a plan is active.</p>}
             {s.chatsLeft != null && s.active && <p className="text-sm"><b>{s.chatsLeft.toLocaleString('en-IN')}</b> automatic replies left</p>}
-            {s.upcoming && <p className="text-sm text-c-violet">Renewal booked: {s.upcoming.planName}, {fmtDate(s.upcoming.startsAt)} – {fmtDate(s.upcoming.endsAt)}</p>}
+            {s.upcoming && <p className="text-sm text-c-violet">Next plan booked: {s.upcoming.planName}, {fmtDate(s.upcoming.startsAt)} – {fmtDate(s.upcoming.endsAt)}</p>}
             <p className="text-xs text-muted">One automatic bot reply counts as one chat. Replies your team types are free.</p>
           </div>
         </section>
