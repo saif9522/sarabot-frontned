@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
-import { CreditCard } from 'lucide-react';
-import { useBillingQuery } from '@/store/api';
+import { useState } from 'react';
+import { CreditCard, Gift } from 'lucide-react';
+import { errorText, useBillingQuery, useStartTrialMutation } from '@/store/api';
 import { ErrorNote, PageHeader, StatusPill } from '@/components/ui';
 import { PlanPill, UsageBar } from '@/components/PlanUsage';
 import BuyPlans from '@/components/BuyPlans';
@@ -9,6 +10,8 @@ import { chats, fmtDate, money } from '@/lib/format';
 
 export default function BillingPage() {
   const { data, isError } = useBillingQuery(undefined, { pollingInterval: 30000 });
+  const [startTrial, { isLoading: starting, error: trialError }] = useStartTrialMutation();
+  const [trialMsg, setTrialMsg] = useState<string | null>(null);
   if (isError) return <ErrorNote what="your plan" />;
   if (!data) return <p className="text-muted">Loading…</p>;
   const s = data.status;
@@ -37,6 +40,23 @@ export default function BillingPage() {
           <Link href="/pricing" className="btn-secondary w-full">See all plans</Link>
         </section>
       </div>
+      {data.trial?.available && (
+        <section className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-c-green-tint p-5 ring-1 ring-brand-edge" aria-labelledby="trial">
+          <div className="flex items-start gap-3">
+            <Gift className="mt-0.5 h-6 w-6 flex-none text-c-green" aria-hidden />
+            <div>
+              <h2 id="trial" className="font-display text-lg font-semibold text-navy">Try it free for {data.trial.durationDays} days</h2>
+              <p className="text-sm text-ink">{data.trial.planName}: {data.trial.chatLimit == null ? 'unlimited' : data.trial.chatLimit.toLocaleString('en-IN')} automatic replies. No payment needed; it stops by itself after {data.trial.durationDays} days. One trial per business.</p>
+              {trialError && <p className="mt-1 text-sm text-err">{errorText(trialError)}</p>}
+            </div>
+          </div>
+          <button className="btn-primary" disabled={starting} onClick={async () => {
+            const r = await startTrial().unwrap().catch(() => null);
+            if (r) setTrialMsg(`${r.planName} is active until ${fmtDate(r.endsAt)}. Your bot is replying now.`);
+          }}>{starting ? 'Starting…' : `Start ${data.trial.durationDays}-day free trial`}</button>
+        </section>
+      )}
+      {trialMsg && <p role="status" className="mt-6 rounded-xl bg-brand-tint p-3 text-sm text-brand-dark">{trialMsg}</p>}
       <BuyPlans renewing={s.active && !!s.endsAt} />
       <section className="card mt-6 overflow-x-auto" aria-labelledby="hist">
         <h2 id="hist" className="px-5 pt-5 font-display text-lg font-semibold text-navy">History</h2>

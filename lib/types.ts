@@ -84,7 +84,7 @@ export interface Customer {
 }
 export interface Payment {
   id: string; workspaceId: string; planName: string; amount: number; currency: string; status: 'created' | 'paid' | 'failed';
-  razorpayOrderId: string; razorpayPaymentId: string | null; paidBy: string; createdAt: string; paidAt: string | null;
+  razorpayOrderId: string; razorpayPaymentId: string | null; subscriptionId?: string | null; paidBy: string; createdAt: string; paidAt: string | null;
   workspace?: { id: string; name: string };
 }
 export interface PlatformUser {

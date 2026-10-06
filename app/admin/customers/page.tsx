@@ -66,7 +66,12 @@ export default function CustomersPage() {
                 <tr key={c.id} className="hover:bg-canvas/60">
                   <td className="px-4 py-3"><Link href={`/admin/customers/${c.id}`} className="font-semibold text-navy hover:underline">{c.name}</Link></td>
                   <td className="px-4 py-3">{c.users[0] ? <><p>{c.users[0].name}</p><p className="text-xs text-muted">{c.users[0].email}</p></> : <span className="text-c-orange">No owner login</span>}</td>
-                  <td className="px-4 py-3"><p className="font-medium">{c.plan.planName ?? '—'}</p><PlanPill p={c.plan} /></td>
+                  <td className="px-4 py-3">
+                    <button type="button" onClick={() => setActivateFor(c.id)} title={c.plan.active ? 'Change or renew plan' : 'Activate a plan'} className="group text-left">
+                      <p className="font-medium group-hover:underline">{c.plan.active ? c.plan.planName : 'No plan'}</p>
+                      {c.plan.active ? <PlanPill p={c.plan} /> : <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-c-violet px-2.5 py-0.5 text-xs font-semibold text-white"><Zap className="h-3 w-3" aria-hidden />Activate</span>}
+                    </button>
+                  </td>
                   <td className="px-4 py-3">{c.plan.planName ? <UsageBar p={c.plan} /> : <span className="text-muted">—</span>}</td>
                   <td className="px-4 py-3">{c._count?.accounts ?? 0}</td>
                   <td className="px-4 py-3"><StatusPill tone={c.status === 'active' ? 'ok' : 'off'}>{c.status === 'active' ? 'Active' : 'Suspended'}</StatusPill></td>
