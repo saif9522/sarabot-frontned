@@ -8,6 +8,7 @@ import { pageMetadata } from '@/lib/seo';
 import { faqSchema, organizationSchema, softwareSchema, websiteSchema } from '@/lib/schema';
 import Container from '@/components/site/Container';
 import PhoneChat from '@/components/site/PhoneChat';
+import Typewriter from '@/components/site/Typewriter';
 import { FormArt, InboxArt, QrArt, ReplyArt } from '@/components/site/Visuals';
 
 export const metadata: Metadata = pageMetadata({
@@ -26,6 +27,9 @@ const FAQ = [
   { q: 'Is there a free trial?', a: 'Yes. New accounts get a free trial with no card needed, so you can test Sarabot on your own WhatsApp number before choosing a plan.' },
   { q: 'Which businesses use Sarabot?', a: 'Online stores, grocery and daily-use product shops, NGOs, clinics, coaching centres, salons, restaurants and any business that gets customer questions on WhatsApp.' },
 ];
+
+/** Rotating words in the hero heading (short enough for one line on phones). */
+const HERO_WORDS = ['online stores', 'grocery shops', 'NGOs', 'clinics', 'restaurants', 'salons', 'your business'];
 
 const BUSINESSES = ['E-commerce stores', 'Grocery and daily-use products', 'NGOs and non-profits', 'Clinics and doctors', 'Coaching centres', 'Salons', 'Restaurants and cafés', 'Pharmacies'];
 
@@ -57,8 +61,13 @@ export default function HomePage() {
       <section className="hero-bg relative overflow-hidden text-white">
         <Container className="grid items-center gap-14 py-16 md:py-20 lg:grid-cols-[1.15fr_1fr] lg:py-24">
           <div>
-            <h1 className="font-display text-[2.7rem] font-bold leading-[1.04] tracking-tight sm:text-6xl xl:text-7xl">
-              The AI WhatsApp chatbot that answers your customers 24/7
+            <h1 className="font-display text-[2.6rem] font-bold leading-[1.06] tracking-tight sm:text-6xl xl:text-7xl">
+              <span className="sr-only">The AI WhatsApp chatbot that answers your customers 24/7, for online stores, grocery shops, NGOs and every business</span>
+              <span aria-hidden>
+                The AI WhatsApp chatbot for{' '}
+                <Typewriter words={HERO_WORDS} className="block whitespace-nowrap text-[#25D366]" />
+                <span className="block text-white/90">replying 24/7.</span>
+              </span>
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-relaxed text-white/80 md:text-xl">
               Sarabot auto-replies on your WhatsApp number with prices, stock, delivery and order details from your own business information. It works day and night in your customer’s language, and hands the chat to you when a person is needed.
@@ -79,7 +88,7 @@ export default function HomePage() {
               <PhoneChat />
               <div className="absolute right-full top-[30%] -mr-4 hidden w-44 items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-navy shadow-xl xl:flex" aria-hidden>
                 <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-brand-tint"><Bot className="h-4 w-4 text-brand" /></span>
-                <span className="leading-tight"><span className="block text-[13px] font-semibold">Replied by Sarabot</span><span className="block text-[11px] text-muted">at 10:42 pm</span></span>
+                <span className="leading-tight"><span className="block text-[13px] font-semibold">Replied by Sarabot</span><span className="block text-[11px] text-muted">in seconds, day or night</span></span>
               </div>
               <div className="absolute left-full top-[56%] -ml-4 hidden w-44 items-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-navy shadow-xl xl:flex" aria-hidden>
                 <span className="grid h-8 w-8 flex-none place-items-center rounded-full bg-auto-tint"><Hand className="h-4 w-4 text-auto" /></span>
@@ -131,15 +140,19 @@ export default function HomePage() {
             <h2 className="font-display text-4xl font-bold tracking-tight text-navy md:text-5xl">Live in three steps</h2>
             <Link href="/how-it-works" className="font-semibold text-brand-dark underline underline-offset-4">Full setup guide</Link>
           </div>
-          <ol className="mt-12 grid gap-6 md:grid-cols-3">
+          <ol className="mt-12 grid gap-8 md:grid-cols-3 md:gap-6">
             {STEPS.map(({ art, title, text }, i) => (
-              <li key={title} className="flex flex-col overflow-hidden rounded-3xl bg-white ring-1 ring-line">
-                <div className="flex h-56 items-center justify-center bg-gradient-to-br from-brand-tint to-[#d6efe5] p-6">{art}</div>
-                <div className="p-7">
-                  <span className="font-display text-sm font-bold text-brand">Step {i + 1}</span>
+              <li key={title} className="relative flex flex-col rounded-3xl bg-white ring-1 ring-line">
+                <div className="steps-panel flex h-72 items-center justify-center rounded-t-3xl p-6">{art}</div>
+                <span className="absolute left-7 top-72 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-navy font-display text-lg font-bold text-white ring-4 ring-white" aria-hidden>{i + 1}</span>
+                <div className="px-7 pb-8 pt-10">
+                  <p className="font-display text-sm font-bold text-brand">Step {i + 1}</p>
                   <h3 className="mt-1 font-display text-2xl font-semibold text-navy">{title}</h3>
                   <p className="mt-2 leading-relaxed text-muted">{text}</p>
                 </div>
+                {i < STEPS.length - 1 && (
+                  <span className="absolute -right-9 top-36 z-10 hidden h-12 w-12 -translate-y-1/2 place-items-center rounded-full bg-[#25D366] text-xl font-bold text-navy shadow-lg md:grid" aria-hidden>→</span>
+                )}
               </li>
             ))}
           </ol>

@@ -48,3 +48,14 @@
 .legal p, .legal li { @apply mt-3 leading-relaxed text-ink; }
 .legal ul { @apply mt-3 list-disc space-y-1 pl-6; }
 .legal a { @apply font-semibold text-brand-dark underline; }
+/* Live chat in the hero phone: each new message pops in */
+@keyframes chat-pop { from { opacity: 0; transform: translateY(10px) scale(0.96); } to { opacity: 1; transform: none; } }
+.chat-pop { animation: chat-pop 0.35s ease-out; }
+/* "typing…" dots */
+@keyframes typing-dot { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+.typing-dot { display: inline-block; width: 6px; height: 6px; border-radius: 9999px; background: #8696A0; animation: typing-dot 1s infinite; }
+/* Blinking caret for the hero typewriter */
+@keyframes caret-blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+.typing-caret { display: inline-block; width: 0.08em; height: 0.9em; margin-left: 0.06em; vertical-align: -0.08em; background: currentColor; animation: caret-blink 1s steps(1) infinite; }
+/* Picture panel on the "three steps" cards */
+.steps-panel { background-color: #E8F6F1; background-image: radial-gradient(rgba(11, 122, 92, 0.12) 1px, transparent 1px), linear-gradient(160deg, #E8F6F1, #D3EFE3); background-size: 16px 16px, auto; }

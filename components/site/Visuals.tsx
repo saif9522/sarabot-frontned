@@ -23,34 +23,64 @@ export function QrArt() {
   const cells: Array<[number, number]> = [];
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (qrCell(x, y)) cells.push([x, y]);
   return (
-    <svg viewBox={`-1 -1 ${N + 2} ${N + 2}`} className="h-28 w-28 rounded-lg bg-white" aria-hidden shapeRendering="crispEdges">
-      {cells.map(([x, y]) => <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="#0B1B3A" />)}
-    </svg>
+    <div className="w-[250px] overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/5" aria-hidden>
+      <div className="flex items-center gap-1.5 border-b border-slate-100 px-3 py-2">
+        <span className="h-2 w-2 rounded-full bg-[#FF5F57]" /><span className="h-2 w-2 rounded-full bg-[#FEBC2E]" /><span className="h-2 w-2 rounded-full bg-[#28C840]" />
+        <span className="ml-2 text-[10px] font-semibold text-slate-500">Sarabot · WhatsApp numbers</span>
+      </div>
+      <div className="flex items-center gap-3 p-3">
+        <svg viewBox={`-1 -1 ${N + 2} ${N + 2}`} className="h-[88px] w-[88px] flex-none rounded-md ring-1 ring-slate-200" shapeRendering="crispEdges">
+          <rect x="-1" y="-1" width={N + 2} height={N + 2} fill="#fff" />
+          {cells.map(([x, y]) => <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="#0B1B3A" />)}
+        </svg>
+        <div className="space-y-1.5 text-[10px] leading-tight text-slate-600">
+          <p className="text-[11px] font-semibold text-[#0B1B3A]">Scan to link</p>
+          <p>1. Open WhatsApp</p>
+          <p>2. Linked devices</p>
+          <p>3. Link a device</p>
+        </div>
+      </div>
+      <div className="flex items-center justify-between border-t border-slate-100 px-3 py-2 text-[10px]">
+        <span className="text-slate-500">+91 98XXX XXX10</span>
+        <span className="rounded-full bg-[#E8F6F1] px-2 py-0.5 font-semibold text-[#0B7A5C]">● Connected</span>
+      </div>
+    </div>
   );
 }
 
 /** A mini business-info form. */
 export function FormArt() {
-  const rows = [['Shop name', 'Sharma Grocery Store'], ['Address', 'Station Road, New Delhi'], ['Timings', '9 am to 9 pm'], ['Delivery', 'Free up to 3 km']];
+  const rows = [['Shop name', 'Sharma Grocery Store'], ['Address', 'Station Road, New Delhi'], ['Delivery', 'Free up to 3 km, same day']];
   return (
-    <div className="w-full max-w-[260px] space-y-2 rounded-xl bg-white p-3 text-[11px] shadow-sm" aria-hidden>
-      {rows.map(([k, v]) => (
-        <div key={k}>
-          <p className="font-semibold text-slate-500">{k}</p>
-          <p className="mt-0.5 rounded-md border border-slate-200 px-2 py-1 text-[#0B1B3A]">{v}</p>
-        </div>
-      ))}
+    <div className="w-[250px] overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-black/5" aria-hidden>
+      <div className="border-b border-slate-100 px-3 py-2 text-[11px] font-semibold text-[#0B1B3A]">Business info</div>
+      <div className="space-y-2 p-3 text-[10.5px]">
+        {rows.map(([k, v]) => (
+          <div key={k}>
+            <p className="font-semibold text-slate-500">{k}</p>
+            <p className="mt-0.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[#0B1B3A]">{v}</p>
+          </div>
+        ))}
+        <div className="flex justify-end pt-1"><span className="rounded-md bg-[#0B7A5C] px-3 py-1 text-[10.5px] font-semibold text-white">Save</span></div>
+      </div>
     </div>
   );
 }
 
-/** Two chat bubbles. */
+/** A short chat answered by the bot. */
 export function ReplyArt() {
   return (
-    <div className="flex w-full max-w-[260px] flex-col gap-2 rounded-xl bg-[#EFEAE2] p-3 text-[11.5px] shadow-sm" aria-hidden>
-      <p className="self-end rounded-lg rounded-tr-none bg-[#D9FDD3] px-2.5 py-1.5">Are you open tomorrow?</p>
-      <p className="self-start rounded-lg rounded-tl-none bg-white px-2.5 py-1.5">Yes, we are open from 9 am to 9 pm.</p>
-      <p className="self-start rounded-full bg-[#0B7A5C] px-2 py-0.5 text-[10px] font-semibold text-white">Sent by Sarabot</p>
+    <div className="w-[250px] overflow-hidden rounded-2xl shadow-lg ring-1 ring-black/5" aria-hidden>
+      <div className="flex items-center gap-2 bg-[#075E54] px-3 py-2 text-white">
+        <span className="grid h-6 w-6 place-items-center rounded-full bg-[#25D366] text-[9px] font-bold text-[#075E54]">SG</span>
+        <span className="text-[11px] font-semibold">Sharma Grocery Store</span>
+      </div>
+      <div className="chat-wallpaper flex flex-col gap-1.5 p-3 text-[11px] leading-snug text-[#111B21]">
+        <p className="self-end rounded-lg rounded-tr-none bg-[#D9FDD3] px-2.5 py-1.5">Are you open tomorrow?</p>
+        <p className="self-start rounded-lg rounded-tl-none bg-white px-2.5 py-1.5">Yes, we are open from 9 am to 9 pm.</p>
+        <p className="self-end rounded-lg rounded-tr-none bg-[#D9FDD3] px-2.5 py-1.5">Great, thanks!</p>
+        <p className="mt-0.5 self-start rounded-full bg-[#0B7A5C] px-2 py-0.5 text-[9.5px] font-semibold text-white">Replied by Sarabot in 3 sec</p>
+      </div>
     </div>
   );
 }
