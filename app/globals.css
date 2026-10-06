@@ -34,3 +34,17 @@
    so with reduced motion (animation: none) every message is simply visible. */
 @keyframes chat-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
 .chat-in { animation: chat-in 0.45s ease-out backwards; }
+/* Dark hero: deep navy with soft WhatsApp-green light, and a faint dot grid */
+.hero-bg {
+  background-color: #0B1B3A;
+  background-image:
+    radial-gradient(60rem 40rem at 85% 10%, rgba(37, 211, 102, 0.22), transparent 60%),
+    radial-gradient(40rem 30rem at 0% 100%, rgba(11, 122, 92, 0.35), transparent 60%),
+    radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: auto, auto, 22px 22px;
+}
+/* Long-form legal text */
+.legal h2 { @apply mt-10 font-display text-2xl font-semibold text-navy; }
+.legal p, .legal li { @apply mt-3 leading-relaxed text-ink; }
+.legal ul { @apply mt-3 list-disc space-y-1 pl-6; }
+.legal a { @apply font-semibold text-brand-dark underline; }

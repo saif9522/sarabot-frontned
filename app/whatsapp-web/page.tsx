@@ -2,12 +2,17 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { AlertTriangle, Check, Smartphone } from 'lucide-react';
 import SiteShell from '@/components/site/SiteShell';
+import JsonLd from '@/components/site/JsonLd';
+import { pageMetadata } from '@/lib/seo';
+import { breadcrumbSchema } from '@/lib/schema';
 import PageIntro from '@/components/site/PageIntro';
 
-export const metadata: Metadata = {
-  title: 'WhatsApp Web linking',
-  description: 'Sarabot connects to your WhatsApp the same way WhatsApp Web does: by scanning a QR code under Linked devices. Here is how to link, and how to use it safely.',
-};
+export const metadata: Metadata = pageMetadata({
+  title: 'WhatsApp Chatbot Without API – Link with QR Code like WhatsApp Web',
+  description: 'Connect a WhatsApp chatbot to your existing number by scanning a QR code under Linked devices, just like WhatsApp Web. No Business API approval needed. Learn how to link safely.',
+  path: '/whatsapp-web',
+  keywords: ['WhatsApp chatbot without API', 'WhatsApp Web automation', 'WhatsApp linked device bot', 'WhatsApp QR code chatbot'],
+});
 
 const LINK_STEPS = [
   'In your Sarabot dashboard, open WhatsApp numbers and press Link a number. A QR code appears.',
@@ -28,11 +33,12 @@ const SAFE = [
 export default function WhatsAppWebPage() {
   return (
     <SiteShell>
-      <PageIntro width="max-w-5xl" title="Connects like WhatsApp Web">
+      <JsonLd data={breadcrumbSchema([{ name: 'WhatsApp Web', path: '/whatsapp-web' }])} />
+      <PageIntro title="Connects like WhatsApp Web">
         Sarabot becomes one of your Linked devices, just like WhatsApp Web on a laptop. You keep your number, your chats and your WhatsApp app.
       </PageIntro>
 
-      <section className="mx-auto grid max-w-5xl gap-12 px-5 pb-16 md:grid-cols-[1.3fr_1fr]">
+      <section className="mx-auto grid w-full max-w-[1440px] gap-12 px-5 py-16 sm:px-8 md:grid-cols-[1.3fr_1fr] md:py-20 lg:px-12">
         <div>
           <h2 className="font-display text-2xl font-semibold text-navy">Link your number</h2>
           <ol className="mt-6 space-y-4">
@@ -57,7 +63,7 @@ export default function WhatsAppWebPage() {
       </section>
 
       <section className="bg-canvas">
-        <div className="mx-auto max-w-5xl px-5 py-16">
+        <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12 py-16">
           <div className="flex items-start gap-3 rounded-2xl border border-auto-edge bg-auto-tint p-6">
             <AlertTriangle className="mt-0.5 h-6 w-6 flex-none text-auto" aria-hidden />
             <div>

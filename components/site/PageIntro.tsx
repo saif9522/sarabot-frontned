@@ -1,13 +1,14 @@
 import { ReactNode } from 'react';
+import Container from './Container';
 
-/** Title band at the top of website pages. */
-export default function PageIntro({ title, children, width = 'max-w-4xl' }: { title: string; children?: ReactNode; width?: 'max-w-4xl' | 'max-w-5xl' | 'max-w-6xl' }) {
+/** Dark title band at the top of website pages, matching the home hero. */
+export default function PageIntro({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <section className="bg-gradient-to-b from-brand-tint/70 to-white">
-      <div className={`mx-auto ${width} px-5 pb-10 pt-14 md:pt-20`}>
-        <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-navy md:text-5xl">{title}</h1>
-        {children && <div className="mt-5 max-w-2xl text-lg leading-relaxed text-ink">{children}</div>}
-      </div>
+    <section className="hero-bg relative overflow-hidden text-white">
+      <Container className="relative py-16 md:py-24">
+        <h1 className="max-w-4xl font-display text-4xl font-bold leading-[1.08] tracking-tight md:text-6xl">{title}</h1>
+        {children && <div className="mt-6 max-w-2xl text-lg leading-relaxed text-white/80">{children}</div>}
+      </Container>
     </section>
   );
 }

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { useMeQuery } from '@/store/api';
 import Brand from '../Brand';
+import Container from './Container';
 import { NAV } from './nav';
 
 
@@ -26,7 +27,7 @@ export default function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-line/70 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-6 px-5">
+      <Container className="flex h-16 items-center justify-between gap-6">
         <Link href="/" aria-label="Sarabot home"><Brand size="sm" /></Link>
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Website">
           {NAV.map((n) => {
@@ -43,7 +44,7 @@ export default function SiteHeader() {
         <button className="rounded-lg p-2 text-ink hover:bg-canvas lg:hidden" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="site-menu" aria-label={open ? 'Close menu' : 'Open menu'}>
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
-      </div>
+      </Container>
       {open && (
         <nav id="site-menu" className="border-t border-line bg-white px-5 pb-5 pt-2 lg:hidden" aria-label="Website">
           <ul className="space-y-1">

@@ -1,12 +1,17 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import SiteShell from '@/components/site/SiteShell';
+import JsonLd from '@/components/site/JsonLd';
+import { pageMetadata } from '@/lib/seo';
+import { breadcrumbSchema, faqSchema } from '@/lib/schema';
 import PageIntro from '@/components/site/PageIntro';
 
-export const metadata: Metadata = {
-  title: 'How it works',
-  description: 'Set up Sarabot in five steps: create an account, link WhatsApp with a QR code, add your business details and products, set your hours, and let it reply.',
-};
+export const metadata: Metadata = pageMetadata({
+  title: 'How to Set Up a WhatsApp Chatbot in 10 Minutes',
+  description: 'Step-by-step guide to setting up Sarabot: create an account, link WhatsApp with a QR code, add your business details and products, choose working hours and start auto-replying.',
+  path: '/how-it-works',
+  keywords: ['how to make a WhatsApp chatbot', 'WhatsApp chatbot setup', 'WhatsApp auto reply setup', 'create WhatsApp bot'],
+});
 
 const STEPS = [
   {
@@ -23,7 +28,7 @@ const STEPS = [
   },
   {
     title: 'Add products and quick replies',
-    text: 'Add products with prices and stock so the bot can answer “rate kya hai?”. Optionally make flows: when someone types “menu” or “offers”, send a fixed reply with an image or a PDF.',
+    text: 'Add products with prices and stock so the bot can answer “what is the price?”. Optionally make flows: when someone types “menu” or “offers”, send a fixed reply with an image or a PDF.',
   },
   {
     title: 'Choose who replies when',
@@ -43,11 +48,12 @@ const FAQ = [
 export default function HowItWorksPage() {
   return (
     <SiteShell>
+      <JsonLd data={[breadcrumbSchema([{ name: 'How it works', path: '/how-it-works' }]), faqSchema(FAQ)]} />
       <PageIntro title="How Sarabot works">
         From sign-up to the first automatic reply takes about ten minutes. Here’s every step.
       </PageIntro>
 
-      <section className="mx-auto max-w-4xl px-5 pb-16">
+      <section className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12 py-16 md:py-20">
         <ol className="relative ml-5 space-y-10 border-l-2 border-brand-edge pl-8">
           {STEPS.map((s, i) => (
             <li key={s.title} className="relative">
@@ -64,9 +70,9 @@ export default function HowItWorksPage() {
       </section>
 
       <section className="bg-canvas">
-        <div className="mx-auto max-w-4xl px-5 py-16">
+        <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12 py-16">
           <h2 className="font-display text-3xl font-bold tracking-tight text-navy">Common questions</h2>
-          <div className="mt-8 divide-y divide-line rounded-2xl bg-white ring-1 ring-line">
+          <div className="mt-8 max-w-4xl divide-y divide-line rounded-2xl bg-white ring-1 ring-line">
             {FAQ.map((f) => (
               <details key={f.q} className="group px-6 py-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold text-navy">

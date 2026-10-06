@@ -20,11 +20,11 @@ export default function PricingPage() {
 
   return (
     <SiteShell>
-      <PageIntro width="max-w-6xl" title="Simple plans, priced by replies">
+      <PageIntro title="Simple plans, priced by replies">
         One chat is one automatic reply from your bot. Replies you or your team type are always free.
       </PageIntro>
 
-      <section className="mx-auto max-w-6xl px-5 pb-16">
+      <section className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12 py-16 md:py-20">
         {trial && (
           <div className="mb-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-brand-tint p-6">
             <div>

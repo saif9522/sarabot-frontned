@@ -10,7 +10,7 @@ import { Modal } from './ui';
 import { fmtDate } from '@/lib/format';
 
 /** Website pages and sign-in pages: no login needed. */
-const PUBLIC = ['/', '/about', '/how-it-works', '/whatsapp-web', '/pricing', '/login', '/signup', '/forgot-password', '/reset-password'];
+const PUBLIC = ['/', '/about', '/solutions', '/how-it-works', '/whatsapp-web', '/pricing', '/privacy', '/terms', '/refund-policy', '/login', '/signup', '/forgot-password', '/reset-password'];
 /** Pages an agent may open */
 const AGENT_PAGES = ['/dashboard', '/chats'];
 
