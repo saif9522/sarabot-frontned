@@ -9,9 +9,10 @@ import Sidebar from './Sidebar';
 import { Modal } from './ui';
 import { fmtDate } from '@/lib/format';
 
-const PUBLIC = ['/login', '/signup', '/forgot-password', '/reset-password', '/pricing'];
+/** Website pages and sign-in pages: no login needed. */
+const PUBLIC = ['/', '/about', '/how-it-works', '/whatsapp-web', '/pricing', '/login', '/signup', '/forgot-password', '/reset-password'];
 /** Pages an agent may open */
-const AGENT_PAGES = ['/', '/chats'];
+const AGENT_PAGES = ['/dashboard', '/chats'];
 
 const ROLE_LABEL = { superadmin: 'Super Admin', owner: 'Owner', admin: 'Admin', agent: 'Agent' } as const;
 
@@ -109,7 +110,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   let redirect: string | null = null;
   if (!isPublic && me) {
     if (!inWorkspace && !path.startsWith('/admin')) redirect = '/admin';
-    else if (inWorkspace && path.startsWith('/admin') && !me.user.actingAs) redirect = '/';
+    else if (inWorkspace && path.startsWith('/admin') && !me.user.actingAs) redirect = '/dashboard';
     else if (role === 'agent' && !AGENT_PAGES.includes(path)) redirect = '/chats';
   }
   useEffect(() => {

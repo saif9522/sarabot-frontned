@@ -33,7 +33,7 @@ export default function CustomerPage() {
   async function open() {
     await actAs(id).unwrap();
     dispatch(api.util.resetApiState());
-    window.location.href = '/';
+    window.location.href = '/dashboard';
   }
   const now = Date.now();
 

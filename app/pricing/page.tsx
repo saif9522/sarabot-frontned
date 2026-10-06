@@ -1,58 +1,82 @@
 'use client';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Check, MessagesSquare } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { usePublicPlansQuery } from '@/store/api';
 import { chats, duration, money } from '@/lib/format';
+import SiteShell from '@/components/site/SiteShell';
+import PageIntro from '@/components/site/PageIntro';
 
 export default function PricingPage() {
   const { data: plans, isLoading, isError } = usePublicPlansQuery();
-  const durations = useMemo(() => [...new Set((plans ?? []).map((p) => p.durationDays))].sort((a, b) => a - b), [plans]);
+  // The sign-up trial has its own banner; tabs are only for paid plans.
+  const paid = useMemo(() => (plans ?? []).filter((p) => !p.trialForSignup), [plans]);
+  const durations = useMemo(() => [...new Set(paid.map((p) => p.durationDays))].sort((a, b) => a - b), [paid]);
   const [picked, setPicked] = useState<number | null>(null);
   const current = picked ?? durations[0] ?? null;
-  const shown = (plans ?? []).filter((p) => p.durationDays === current);
+  const trial = (plans ?? []).find((p) => p.trialForSignup);
+  const shown = paid.filter((p) => p.durationDays === current);
+  const popular = shown.length >= 3 ? shown[1]?.id : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-c-violet-tint via-white to-c-pink-tint">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-        <Link href="/pricing" className="flex items-center gap-3 font-display text-xl font-bold text-navy"><MessagesSquare className="h-7 w-7 text-brand" aria-hidden /> SAIF Chat</Link>
-        <span className="flex gap-2"><Link href="/login" className="btn-secondary">Sign in</Link><Link href="/signup" className="btn-primary">Sign up</Link></span>
-      </header>
-      <main className="mx-auto max-w-6xl px-6 pb-20 pt-8">
-        <h1 className="text-center font-display text-4xl font-bold tracking-tight text-navy md:text-5xl">Plans that grow with your chats</h1>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-lg text-muted">A chat is one automatic reply from your bot. Replies you type yourself are always free.</p>
+    <SiteShell>
+      <PageIntro width="max-w-6xl" title="Simple plans, priced by replies">
+        One chat is one automatic reply from your bot. Replies you or your team type are always free.
+      </PageIntro>
+
+      <section className="mx-auto max-w-6xl px-5 pb-16">
+        {trial && (
+          <div className="mb-10 flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-brand-tint p-6">
+            <div>
+              <h2 className="font-display text-xl font-semibold text-navy">Free for {duration(trial.durationDays)} when you sign up</h2>
+              <p className="mt-1 text-ink">{chats(trial.chatLimit)} automatic replies to try Sarabot on your own WhatsApp. No card needed.</p>
+            </div>
+            <Link href="/signup" className="btn-primary h-11 rounded-full px-6">Start free trial</Link>
+          </div>
+        )}
 
         {durations.length > 1 && (
-          <div className="mx-auto mt-8 flex w-fit flex-wrap justify-center gap-1 rounded-full bg-white p-1 shadow-sm ring-1 ring-line" role="group" aria-label="Billing period">
+          <div className="mb-8 flex w-fit flex-wrap gap-1 rounded-full bg-canvas p-1 ring-1 ring-line" role="group" aria-label="Billing period">
             {durations.map((d) => (
               <button key={d} aria-pressed={d === current} onClick={() => setPicked(d)}
-                className={`h-10 rounded-full px-5 text-sm font-semibold ${d === current ? 'bg-c-violet text-white' : 'text-c-violet hover:bg-c-violet-tint'}`}>{duration(d)}</button>
+                className={`h-10 rounded-full px-5 text-sm font-semibold ${d === current ? 'bg-navy text-white' : 'text-navy hover:bg-white'}`}>{duration(d)}</button>
             ))}
           </div>
         )}
 
-        {isError && <p className="mt-10 text-center text-err">Plans couldn&apos;t be loaded right now.</p>}
-        {isLoading && <p className="mt-10 text-center text-muted">Loading plans…</p>}
-        {plans && !plans.length && <p className="mt-10 text-center text-muted">Plans will appear here soon.</p>}
+        {isError && <p className="text-err">Plans couldn&apos;t be loaded right now. Please refresh in a minute.</p>}
+        {isLoading && <p className="text-muted">Loading plans…</p>}
+        {plans && !shown.length && !isLoading && <p className="text-muted">Paid plans will appear here soon. Start with the free trial meanwhile.</p>}
 
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {shown.map((p, i) => (
-            <article key={p.id} className={`flex flex-col rounded-3xl bg-white p-7 shadow-sm ring-1 ${i === 1 ? 'ring-2 ring-c-violet' : 'ring-line'}`}>
-              <h2 className="font-display text-xl font-semibold text-navy">{p.name}</h2>
-              {p.trialForSignup && <span className="mt-1 w-fit rounded-full bg-c-green-tint px-2.5 py-0.5 text-xs font-semibold text-c-green">Free with every new account</span>}
-              {p.description && <p className="mt-1 text-sm text-muted">{p.description}</p>}
-              <p className="mt-5"><span className="font-display text-4xl font-bold text-navy">{money(p.price, p.currency)}</span> <span className="text-muted">/ {duration(p.durationDays)}</span></p>
-              <ul className="mt-6 flex-1 space-y-2.5 text-sm">
-                {[`${chats(p.chatLimit)} automatic replies`, `${p.numbersLimit} WhatsApp number${p.numbersLimit === 1 ? '' : 's'}`, `${p.agentsLimit} team member${p.agentsLimit === 1 ? '' : 's'}`, 'Bot flows with images & documents', 'AI replies from your business info'].map((f) => (
-                  <li key={f} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 flex-none text-c-green" aria-hidden />{f}</li>
-                ))}
-              </ul>
-              <Link href="/signup" className="btn-primary mt-7 h-11 rounded-full">{p.trialForSignup ? 'Start free trial' : 'Get started'}</Link>
-            </article>
-          ))}
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {shown.map((p) => {
+            const isPopular = p.id === popular;
+            return (
+              <article key={p.id} className={`flex flex-col rounded-3xl p-7 ${isPopular ? 'bg-navy text-white' : 'bg-white ring-1 ring-line'}`}>
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className={`font-display text-2xl font-semibold ${isPopular ? 'text-white' : 'text-navy'}`}>{p.name}</h2>
+                  {isPopular && <span className="rounded-full bg-brand-glow px-3 py-1 text-xs font-semibold text-navy">Recommended</span>}
+                </div>
+                {p.description && <p className={`mt-1 text-sm ${isPopular ? 'text-white/75' : 'text-muted'}`}>{p.description}</p>}
+                <p className="mt-6">
+                  <span className="font-display text-5xl font-bold tracking-tight">{money(p.price, p.currency)}</span>
+                  <span className={isPopular ? 'text-white/75' : 'text-muted'}> / {duration(p.durationDays)}</span>
+                </p>
+                <ul className="mt-6 flex-1 space-y-2.5 text-sm">
+                  {[`${chats(p.chatLimit)} automatic replies`, `${p.numbersLimit} WhatsApp number${p.numbersLimit === 1 ? '' : 's'}`, `${p.agentsLimit} team member${p.agentsLimit === 1 ? '' : 's'}`, 'AI replies from your business info', 'Quick replies with images and PDFs'].map((f) => (
+                    <li key={f} className="flex gap-2"><Check className={`mt-0.5 h-4 w-4 flex-none ${isPopular ? 'text-brand-glow' : 'text-brand'}`} aria-hidden />{f}</li>
+                  ))}
+                </ul>
+                <Link href="/signup" className={`mt-8 h-12 rounded-full text-base ${isPopular ? 'btn bg-brand-glow text-navy hover:bg-white' : 'btn-primary'}`}>Get started</Link>
+              </article>
+            );
+          })}
         </div>
-        <p className="mt-10 text-center text-sm text-muted">Plans are activated by our team after payment. Already a customer? <Link href="/login" className="font-semibold text-c-indigo hover:underline">Sign in</Link></p>
-      </main>
-    </div>
+
+        <p className="mt-10 text-sm text-muted">
+          Pay online from your dashboard after signing up. Buying the same plan again extends it; a bigger plan starts right away. Already a customer? <Link href="/login" className="font-semibold text-brand-dark hover:underline">Log in</Link>
+        </p>
+      </section>
+    </SiteShell>
   );
 }

@@ -62,7 +62,7 @@ export default function BuyPlans({ renewing }: { renewing: boolean }) {
       let finished = false;
       const rzp = new window.Razorpay({
         key: order.keyId, order_id: order.orderId, amount: order.amount, currency: order.currency,
-        name: 'SAIF Chat', description: order.planName,
+        name: 'Sarabot', description: order.planName,
         prefill: { name: data!.prefill.name, email: data!.prefill.email },
         notes: { business: data!.business },
         theme: { color: '#7C3AED' },

@@ -15,7 +15,7 @@ export default function SignupPage() {
     e.preventDefault();
     if (f.password !== f.confirm) return;
     await signup({ businessName: f.businessName.trim(), name: f.name.trim(), email: f.email.trim(), mobile: f.mobile.trim() || undefined, password: f.password }).unwrap();
-    window.location.href = '/';
+    window.location.href = '/dashboard';
   }
 
   if (info && !info.open) {

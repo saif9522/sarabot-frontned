@@ -197,7 +197,7 @@ export default function NumbersPage() {
 
       <p className="mt-4 max-w-3xl text-xs text-muted">
         This links like WhatsApp Web, which is not an official WhatsApp API. WhatsApp may ban numbers that send automated or bulk messages.
-        SAIF Chat only replies to people who message first, never in groups, waits a moment and shows &ldquo;typing…&rdquo; before replying, and caps replies per contact.
+        Sarabot only replies to people who message first, never in groups, waits a moment and shows &ldquo;typing…&rdquo; before replying, and caps replies per contact.
       </p>
 
       <Modal open={adder} onClose={() => setAdder(false)} title="Link a WhatsApp number">

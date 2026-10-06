@@ -1,165 +1,148 @@
-'use client';
-import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowDownLeft, ArrowUpRight, Bot, CheckCircle2, Circle, MessagesSquare, Package, Smartphone, UserRound, Users, type LucideIcon } from 'lucide-react';
-import { useDashboardQuery } from '@/store/api';
-import { ErrorNote, IconTile, StatusPill, Tone, toneClass } from '@/components/ui';
-import { phone } from '@/lib/format';
-import type { SessionStatus } from '@/lib/types';
+import type { Metadata } from 'next';
+import { BellRing, Check, Clock3, Hand, Languages, MapPin, PackageSearch, QrCode, ShieldCheck, Store, UserRoundCheck, Users } from 'lucide-react';
+import SiteShell from '@/components/site/SiteShell';
+import ChatDemo from '@/components/site/ChatDemo';
 
-const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-const daysAgo = (n: number) => { const d = new Date(); d.setDate(d.getDate() - n); return iso(d); };
-const PRESETS = [{ label: 'Today', from: 0 }, { label: 'Last 7 days', from: 6 }, { label: 'Last 30 days', from: 29 }];
+export const metadata: Metadata = {
+  title: { absolute: 'Sarabot – WhatsApp chatbot for shops and small businesses' },
+  description: 'Sarabot answers your customers on WhatsApp in Hindi, English or Hinglish, day and night. Link your number with a QR code, add your products, and start in minutes.',
+};
 
-function StatCard({ label, value, sub, icon, tone }: { label: string; value: string | number; sub?: string; icon: LucideIcon; tone: Tone }) {
+const ANSWERS = [
+  { icon: PackageSearch, title: 'Prices and stock', text: 'From your product list. If something is out of stock, it says so instead of guessing.' },
+  { icon: MapPin, title: 'Address, timings, delivery', text: 'From the business details you fill in once: location, phone, website, opening hours.' },
+  { icon: Store, title: 'Anything you teach it', text: 'Write your FAQs, fees and rules in plain words, like you would explain them to a new staff member.' },
+  { icon: BellRing, title: 'And when it doesn’t know', text: 'It doesn’t make things up. The chat is marked “Needs you” so you can reply yourself.' },
+];
+
+const STEPS = [
+  { icon: QrCode, title: 'Link your WhatsApp', text: 'Scan a QR code from your phone, the same way you open WhatsApp Web. Your number stays the same.' },
+  { icon: Store, title: 'Tell it about your business', text: 'Add your shop details, products and prices, and a welcome message. No coding.' },
+  { icon: Hand, title: 'Let it reply, step in anytime', text: 'Sarabot answers new messages. Reply from your dashboard whenever you want, and the bot steps back.' },
+];
+
+const CONTROL = [
+  { icon: Clock3, title: 'Day bot and night bot', text: 'One bot during working hours, another after closing time. Or the same bot all day.' },
+  { icon: UserRoundCheck, title: 'Take over any chat', text: 'The moment you type a reply, the bot pauses for that customer.' },
+  { icon: Users, title: 'Your team in one place', text: 'Add staff as agents. Each one sees the chats assigned to them.' },
+  { icon: ShieldCheck, title: 'Careful by design', text: 'Only replies to people who message you first. Never in groups. Customers can send STOP anytime.' },
+];
+
+export default function HomePage() {
   return (
-    <div className={`rounded-2xl p-5 shadow-sm ${toneClass(tone, true)}`}>
-      <div className="flex items-start justify-between gap-3">
-        <span className="grid h-11 w-11 place-items-center rounded-xl bg-white/20"><IconInner icon={icon} /></span>
-        <p className="font-display text-3xl font-bold tabular-nums">{value}</p>
-      </div>
-      <p className="mt-3 text-sm font-semibold">{label}</p>
-      {sub && <p className="text-xs text-white">{sub}</p>}
-    </div>
-  );
-}
-const IconInner = ({ icon: Icon }: { icon: LucideIcon }) => <Icon className="h-5 w-5" aria-hidden />;
-
-function Status({ s }: { s: SessionStatus }) {
-  if (s === 'connected') return <StatusPill tone="ok">Connected</StatusPill>;
-  if (s === 'qr' || s === 'starting') return <StatusPill tone="busy">Connecting…</StatusPill>;
-  return <StatusPill tone="off">Disconnected</StatusPill>;
-}
-
-export default function Dashboard() {
-  const [from, setFrom] = useState(daysAgo(0));
-  const [to, setTo] = useState(daysAgo(0));
-  const { data: d, isError } = useDashboardQuery({ from, to }, { pollingInterval: 30000 });
-  const rangeLabel = useMemo(() => {
-    const p = PRESETS.find((x) => from === daysAgo(x.from) && to === daysAgo(0));
-    return p ? p.label.toLowerCase() : 'in this period';
-  }, [from, to]);
-
-  if (isError) return <ErrorNote what="the dashboard" />;
-
-  const steps = d ? [
-    { done: d.setup.bots > 0, label: 'Create a bot with business info and flows', href: '/bots' },
-    { done: d.setup.products > 0, label: 'Add products (optional) for prices and stock', href: '/products' },
-    { done: d.numbers.connected > 0, label: 'Link a WhatsApp number and choose its bots', href: '/numbers' },
-  ] : [];
-  const quick: Array<{ href: string; label: string; icon: LucideIcon; tone: Tone }> = [
-    { href: '/bots', label: 'Bots', icon: Bot, tone: 'violet' },
-    { href: '/numbers', label: 'WhatsApp numbers', icon: Smartphone, tone: 'green' },
-    { href: '/chats', label: 'Chat history', icon: MessagesSquare, tone: 'sky' },
-    { href: '/products', label: 'Products', icon: Package, tone: 'amber' },
-  ];
-
-  return (
-    <>
-      {/* Welcome banner */}
-      <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line" aria-label="Welcome">
-        <div className="bg-gradient-to-r from-c-indigo via-c-violet to-c-pink px-6 py-7 text-white">
-          <p className="text-sm text-white/85">Welcome back</p>
-          <h1 className="font-display text-3xl font-bold tracking-tight">Your WhatsApp is answering for you</h1>
-          <p className="mt-1 text-white/90">
-            {d ? `${d.numbers.connected} of ${d.numbers.total} number${d.numbers.total === 1 ? '' : 's'} connected · AI replies ${d.aiAvailable ? 'on' : 'off'}` : 'Loading…'}
-          </p>
-        </div>
-        <nav className="grid grid-cols-2 divide-x divide-y divide-line sm:grid-cols-4 sm:divide-y-0" aria-label="Quick links">
-          {quick.map((q) => (
-            <Link key={q.href} href={q.href} className="flex flex-col items-center gap-2 px-4 py-5 text-sm font-medium text-ink transition-colors hover:bg-canvas">
-              <IconTile icon={q.icon} tone={q.tone} />
-              {q.label}
-            </Link>
-          ))}
-        </nav>
-      </section>
-
-      {d && d.needsHuman > 0 && (
-        <Link href="/chats?filter=human" className="mt-6 flex items-center justify-between gap-4 rounded-2xl bg-c-orange-tint p-4 text-c-orange ring-1 ring-auto-edge hover:ring-c-orange">
-          <span><b>{d.needsHuman} chat{d.needsHuman === 1 ? '' : 's'} need{d.needsHuman === 1 ? 's' : ''} you.</b> The bot couldn&apos;t answer these.</span>
-          <span className="font-semibold underline">Open</span>
-        </Link>
-      )}
-
-      {/* Date filter */}
-      <section className="mt-6 flex flex-wrap items-end justify-between gap-3 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-line" aria-label="Report period">
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Quick periods">
-          {PRESETS.map((p) => {
-            const active = from === daysAgo(p.from) && to === daysAgo(0);
-            return (
-              <button key={p.label} aria-pressed={active} onClick={() => { setFrom(daysAgo(p.from)); setTo(daysAgo(0)); }}
-                className={`h-9 rounded-full px-4 text-sm font-semibold ${active ? 'bg-c-indigo text-white' : 'bg-canvas text-ink hover:bg-c-indigo-tint'}`}>{p.label}</button>
-            );
-          })}
-        </div>
-        <div className="flex flex-wrap items-end gap-2">
-          <div><label htmlFor="d-from" className="label">From</label><input id="d-from" type="date" className="input h-9" value={from} max={to} onChange={(e) => e.target.value && setFrom(e.target.value)} /></div>
-          <div><label htmlFor="d-to" className="label">To</label><input id="d-to" type="date" className="input h-9" value={to} min={from} max={daysAgo(0)} onChange={(e) => e.target.value && setTo(e.target.value)} /></div>
-        </div>
-      </section>
-
-      {/* Stat cards */}
-      <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Totals">
-        <StatCard tone="blue" icon={Smartphone} label="WhatsApp numbers" value={d ? `${d.numbers.connected}/${d.numbers.total}` : '–'} sub="connected" />
-        <StatCard tone="orange" icon={ArrowDownLeft} label="Messages received" value={d?.totals.received ?? '–'} sub={rangeLabel} />
-        <StatCard tone="green" icon={ArrowUpRight} label="Bot replies" value={d?.totals.botReplies ?? '–'} sub={d ? `${d.totals.byFlow} by flows · ${d.totals.byAi} by AI` : undefined} />
-        <StatCard tone="pink" icon={Users} label="Subscribers" value={d?.subscribers.total ?? '–'} sub={d ? `+${d.subscribers.newInRange} new ${rangeLabel}` : undefined} />
-      </section>
-
-      {/* Per number */}
-      <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-line" aria-labelledby="per-number">
-        <div className="flex items-center gap-3 bg-c-green px-5 py-4 text-white">
-          <Smartphone className="h-5 w-5" aria-hidden />
-          <h2 id="per-number" className="font-display text-lg font-semibold">WhatsApp numbers <span className="font-normal text-white/85">· {rangeLabel}</span></h2>
-        </div>
-        {!d?.perNumber.length ? (
-          <p className="p-5 text-sm text-muted">No numbers linked yet. <Link href="/numbers" className="font-semibold text-c-green underline">Link a number</Link></p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="bg-c-green-tint text-xs text-c-green">
-                <tr>
-                  <th className="px-5 py-3 font-semibold">Number</th><th className="px-5 py-3 font-semibold">Status</th>
-                  <th className="px-5 py-3 text-right font-semibold">Received</th><th className="px-5 py-3 text-right font-semibold">Bot replies</th>
-                  <th className="px-5 py-3 text-right font-semibold">Your replies</th><th className="px-5 py-3 font-semibold">Bot</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {d.perNumber.map((n) => (
-                  <tr key={n.id}>
-                    <td className="px-5 py-3"><p className="font-semibold text-navy">{n.phone ? phone(n.phone) : 'Not linked yet'}</p><p className="text-xs text-muted">{n.label}</p></td>
-                    <td className="px-5 py-3"><Status s={n.status} /></td>
-                    <td className="px-5 py-3 text-right tabular-nums">{n.received}</td>
-                    <td className="px-5 py-3 text-right tabular-nums">{n.botReplies}</td>
-                    <td className="px-5 py-3 text-right tabular-nums">{n.humanReplies}</td>
-                    <td className="px-5 py-3"><StatusPill tone={n.botEnabled ? 'ok' : 'off'}>{n.botEnabled ? 'On' : 'Off'}</StatusPill></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <SiteShell>
+      {/* Hero */}
+      <section className="bg-gradient-to-b from-brand-tint/70 to-white">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-12 md:pt-20 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+          <div>
+            <h1 className="font-display text-[2.6rem] font-bold leading-[1.05] tracking-tight text-navy sm:text-6xl">
+              Customer WhatsApp karta hai. Sarabot turant jawab deta hai.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink">
+              Sarabot replies to your customers on WhatsApp in Hindi, English or Hinglish, day and night. Prices, stock, address, delivery: it answers from your own shop details, and hands the chat to you when it should.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/signup" className="btn-primary h-12 rounded-full px-7 text-base">Start free trial</Link>
+              <Link href="/how-it-works" className="btn-secondary h-12 rounded-full px-7 text-base">See how it works</Link>
+            </div>
+            <ul className="mt-8 grid max-w-lg gap-2.5 text-sm text-ink sm:grid-cols-2">
+              {['Works with WhatsApp and WhatsApp Business', 'Set up in about 10 minutes', 'No new number needed', 'Free trial, no card needed'].map((t) => (
+                <li key={t} className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 flex-none text-brand" aria-hidden />{t}</li>
+              ))}
+            </ul>
           </div>
-        )}
+          <ChatDemo />
+        </div>
       </section>
 
-      {d && steps.some((s) => !s.done) && (
-        <section className="mt-6 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-line" aria-labelledby="setup">
-          <h2 id="setup" className="font-display text-lg font-semibold text-navy">Get set up</h2>
-          <ol className="mt-3 space-y-1">
-            {steps.map((s) => (
-              <li key={s.href}>
-                <Link href={s.href} className="flex items-center gap-3 rounded-lg p-2 hover:bg-canvas">
-                  {s.done ? <CheckCircle2 className="h-5 w-5 text-c-green" aria-label="Done" /> : <Circle className="h-5 w-5 text-line" aria-label="To do" />}
-                  <span className={s.done ? 'text-muted line-through' : 'text-ink'}>{s.label}</span>
-                </Link>
+      {/* What it answers */}
+      <section className="mx-auto max-w-6xl px-5 py-20">
+        <div className="grid gap-12 lg:grid-cols-[1fr_1.4fr]">
+          <div>
+            <h2 className="font-display text-3xl font-bold tracking-tight text-navy md:text-4xl">Answers from your shop, not from the internet</h2>
+            <p className="mt-4 max-w-md leading-relaxed text-muted">
+              Most customer messages are the same ten questions. Sarabot answers them with the facts you give it, in the language the customer wrote in.
+            </p>
+            <p className="mt-6 flex items-center gap-2 text-sm font-medium text-brand-dark"><Languages className="h-5 w-5" aria-hidden /> Hindi, English, Hinglish and more</p>
+          </div>
+          <dl className="grid gap-x-10 gap-y-9 sm:grid-cols-2">
+            {ANSWERS.map(({ icon: Icon, title, text }) => (
+              <div key={title} className="border-t-2 border-brand pt-5">
+                <dt className="flex items-center gap-2.5 font-display text-lg font-semibold text-navy"><Icon className="h-5 w-5 text-brand" aria-hidden />{title}</dt>
+                <dd className="mt-2 leading-relaxed text-muted">{text}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </section>
+
+      {/* How it works (a real sequence) */}
+      <section className="bg-canvas">
+        <div className="mx-auto max-w-6xl px-5 py-20">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <h2 className="font-display text-3xl font-bold tracking-tight text-navy md:text-4xl">Live in three steps</h2>
+            <Link href="/how-it-works" className="font-semibold text-brand-dark underline-offset-4 hover:underline">Full setup guide</Link>
+          </div>
+          <ol className="mt-10 grid gap-8 md:grid-cols-3">
+            {STEPS.map(({ icon: Icon, title, text }, i) => (
+              <li key={title} className="relative">
+                <span className="font-display text-5xl font-bold text-brand/25" aria-hidden>{i + 1}</span>
+                <h3 className="mt-2 flex items-center gap-2 font-display text-xl font-semibold text-navy"><Icon className="h-5 w-5 text-brand" aria-hidden />{title}</h3>
+                <p className="mt-2 leading-relaxed text-muted">{text}</p>
               </li>
             ))}
           </ol>
-        </section>
-      )}
-      {d && !d.aiAvailable && (
-        <p className="mt-6 flex items-center gap-2 text-sm text-muted"><UserRound className="h-4 w-4" aria-hidden /> AI replies are off: no Gemini API key yet (Super Admin → Platform settings). Flows and fallback messages still work.</p>
-      )}
-    </>
+        </div>
+      </section>
+
+      {/* WhatsApp Web teaser */}
+      <section className="mx-auto max-w-6xl px-5 py-20">
+        <div className="grid items-center gap-10 rounded-3xl bg-navy p-8 text-white md:grid-cols-[1.3fr_1fr] md:p-12">
+          <div>
+            <h2 className="font-display text-3xl font-bold tracking-tight">Connects like WhatsApp Web</h2>
+            <p className="mt-4 max-w-lg leading-relaxed text-white/80">
+              No Facebook business approval and no new number. Open WhatsApp on your phone, go to Linked devices, and scan the code in your Sarabot dashboard. That’s the whole connection.
+            </p>
+            <Link href="/whatsapp-web" className="mt-6 inline-block font-semibold text-brand-glow underline-offset-4 hover:underline">How linking works, and how to stay safe</Link>
+          </div>
+          <ol className="space-y-3 text-sm">
+            {['Open WhatsApp on your phone', 'Tap Linked devices', 'Tap Link a device', 'Scan the QR code in Sarabot'].map((s, i) => (
+              <li key={s} className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3">
+                <span className="grid h-7 w-7 flex-none place-items-center rounded-full bg-brand-glow font-display font-bold text-navy">{i + 1}</span>{s}
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Control */}
+      <section className="mx-auto max-w-6xl px-5 pb-20">
+        <h2 className="font-display text-3xl font-bold tracking-tight text-navy md:text-4xl">You stay in charge</h2>
+        <div className="mt-10 grid gap-x-10 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
+          {CONTROL.map(({ icon: Icon, title, text }) => (
+            <div key={title}>
+              <Icon className="h-6 w-6 text-brand" aria-hidden />
+              <h3 className="mt-3 font-display text-lg font-semibold text-navy">{title}</h3>
+              <p className="mt-1.5 leading-relaxed text-muted">{text}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-brand-tint">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-6 px-5 py-14">
+          <div>
+            <h2 className="font-display text-3xl font-bold tracking-tight text-navy">Try Sarabot on your own WhatsApp</h2>
+            <p className="mt-2 text-ink">Start with a free trial. Pick a plan only if it works for your shop.</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/signup" className="btn-primary h-12 rounded-full px-7 text-base">Start free trial</Link>
+            <Link href="/pricing" className="btn-secondary h-12 rounded-full px-7 text-base">See pricing</Link>
+          </div>
+        </div>
+      </section>
+    </SiteShell>
   );
 }

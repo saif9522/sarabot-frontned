@@ -38,7 +38,7 @@ function LoginForm() {
   function done(role: string) {
     const next = params.get('next');
     // Full reload so live updates connect with the new session.
-    window.location.href = next && next.startsWith('/') && !next.startsWith('//') ? next : role === 'superadmin' ? '/admin' : '/';
+    window.location.href = next && next.startsWith('/') && !next.startsWith('//') ? next : role === 'superadmin' ? '/admin' : '/dashboard';
   }
 
   async function sendCode(e?: FormEvent) {
