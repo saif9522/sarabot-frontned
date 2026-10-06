@@ -26,6 +26,8 @@ export const api = createApi({
   endpoints: (b) => ({
     me: b.query<Me, void>({ query: () => 'auth/me', providesTags: ['Me'] }),
     login: b.mutation<{ ok: true; role: string }, { email: string; password: string }>({ query: (body) => ({ url: 'auth/login', method: 'POST', body }) }),
+    otpRequest: b.mutation<{ ok: true; message: string }, { email: string }>({ query: (body) => ({ url: 'auth/otp/request', method: 'POST', body }) }),
+    otpVerify: b.mutation<{ ok: true; role: string }, { email: string; code: string }>({ query: (body) => ({ url: 'auth/otp/verify', method: 'POST', body }) }),
     signupInfo: b.query<{ open: boolean; trial: { name: string; chatLimit: number | null; durationDays: number } | null; emailConfigured: boolean }, void>({ query: () => 'auth/signup-info' }),
     signup: b.mutation<{ ok: true; role: string; trial: boolean }, { businessName: string; name: string; email: string; mobile?: string; password: string }>({
       query: (body) => ({ url: 'auth/signup', method: 'POST', body }),
@@ -174,6 +176,7 @@ export const api = createApi({
 
 export const {
   useMeQuery, useLoginMutation, useLogoutMutation, useChangePasswordMutation,
+  useOtpRequestMutation, useOtpVerifyMutation,
   useSignupInfoQuery, useSignupMutation, useForgotMutation, useResetCheckQuery, useResetWithTokenMutation,
   useAdminOverviewQuery, useAdminPlansQuery, useSavePlanMutation, useDeletePlanMutation, useCustomersQuery, useCustomerQuery,
   useAddCustomerMutation, useUpdateCustomerMutation, useDeleteCustomerMutation, useAddOwnerMutation, useResetPasswordMutation,
