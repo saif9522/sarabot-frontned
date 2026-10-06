@@ -49,16 +49,26 @@ export function Switch({ checked, onChange, label, disabled }: { checked: boolea
 
 export function Modal({ open, onClose, title, children, wide }: { open: boolean; onClose: () => void; title: string; children: ReactNode; wide?: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
+  // Keep the latest onClose without re-running the effect on every render
+  // (pages pass a new arrow function each time, which used to steal focus after every keystroke).
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  // Focus the first field only once, when the modal opens.
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    const box = ref.current;
+    (box?.querySelector<HTMLElement>('input, textarea, select') ?? box?.querySelector<HTMLElement>('button'))?.focus();
+  }, [open]);
+  // Close on Escape.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeRef.current();
     document.addEventListener('keydown', onKey);
-    ref.current?.querySelector<HTMLElement>('input, textarea, select, button')?.focus();
     return () => document.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  }, [open]);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy/50 p-4 pt-[8vh]" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-navy/50 p-4 pt-[8vh]" onMouseDown={(e) => e.target === e.currentTarget && closeRef.current()}>
       <div ref={ref} role="dialog" aria-modal="true" aria-labelledby="modal-title" className={`card w-full ${wide ? 'max-w-2xl' : 'max-w-lg'} p-6 shadow-2xl`}>
         <div className="mb-4 flex items-start justify-between gap-4">
           <h2 id="modal-title" className="font-display text-xl font-semibold text-navy">{title}</h2>
