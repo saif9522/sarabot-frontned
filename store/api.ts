@@ -159,7 +159,24 @@ export const api = createApi({
     thread: b.query<{ contact: Contact; messages: Message[] }, string>({ query: (id) => `chats/${id}`, providesTags: (_r, _e, id) => [{ type: 'Thread', id }] }),
     sendMessage: b.mutation<Message, { id: string; text: string }>({
       query: ({ id, text }) => ({ url: `chats/${id}/send`, method: 'POST', body: { text } }),
-      invalidatesTags: (_r, _e, { id }) => [{ type: 'Thread', id }, 'Chats'],
+      // Like WhatsApp: the bubble appears instantly, then is replaced by the saved message.
+      async onQueryStarted({ id, text }, { dispatch, queryFulfilled }) {
+        const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        const temp: Message = { id: tempId, direction: 'out', body: text, sentBy: 'human', type: 'text', media: '', createdAt: new Date().toISOString(), pending: true };
+        dispatch(api.util.updateQueryData('thread', id, (d) => { d.messages.push(temp); }));
+        try {
+          const { data: saved } = await queryFulfilled;
+          dispatch(api.util.updateQueryData('thread', id, (d) => {
+            d.messages = d.messages.filter((m) => m.id !== tempId);
+            if (!d.messages.some((m) => m.id === saved.id)) d.messages.push(saved);
+            d.contact.botPaused = true;
+            d.contact.needsHuman = false;
+          }));
+        } catch {
+          dispatch(api.util.updateQueryData('thread', id, (d) => { d.messages = d.messages.filter((m) => m.id !== tempId); }));
+        }
+      },
+      invalidatesTags: ['Chats'],
     }),
     updateContact: b.mutation<Contact, { id: string; botPaused?: boolean; optedOut?: boolean; needsHuman?: boolean; tags?: string; assignedToId?: string | null }>({
       query: ({ id, ...body }) => ({ url: `contacts/${id}`, method: 'PATCH', body }),

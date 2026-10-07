@@ -19,7 +19,7 @@ export interface Bot {
   welcomeMessage: string; fallbackMessage: string; useProducts: boolean; updatedAt: string;
   flows?: Flow[]; _count?: { flows: number; workingFor: number; offHoursFor: number }; aiAvailable?: boolean;
 }
-export interface Message { id: string; direction: 'in' | 'out'; body: string; sentBy: string; type: 'text' | 'image' | 'document'; media: string; createdAt: string }
+export interface Message { id: string; direction: 'in' | 'out'; body: string; sentBy: string; type: 'text' | 'image' | 'document'; media: string; createdAt: string; /** shown before the server confirms (dashboard only) */ pending?: boolean }
 export interface Contact {
   id: string; accountId: string; waId: string; name: string | null; botPaused: boolean; needsHuman: boolean; optedOut: boolean;
   tags: string; messageCount: number; firstSeenAt: string; lastMessageAt: string;

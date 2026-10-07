@@ -1,7 +1,7 @@
 'use client';
 import { FormEvent, Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Bot, MessagesSquare, UserRound } from 'lucide-react';
+import { Bot, MessagesSquare, UserRound, Clock, CheckCheck } from 'lucide-react';
 import { useAccountsQuery, useChatsQuery, useMeQuery, useSendMessageMutation, useTeamQuery, useThreadQuery, useUpdateContactMutation } from '@/store/api';
 import { Empty, ErrorNote, PageHeader, StatusPill } from '@/components/ui';
 import { SENT_BY, phone, timeAgo } from '@/lib/format';
@@ -32,21 +32,32 @@ function Assign({ c }: { c: { id: string; assignedToId?: string | null; assigned
 function Thread({ id }: { id: string }) {
   const { data, isError } = useThreadQuery(id);
   const [update, { isLoading: updating }] = useUpdateContactMutation();
-  const [send, { isLoading: sending, error }] = useSendMessageMutation();
+  const [send] = useSendMessageMutation();
+  const [failed, setFailed] = useState<string | null>(null);
   const [text, setText] = useState('');
   const end = useRef<HTMLDivElement>(null);
+  const count = data?.messages.length ?? 0;
+  const first = useRef(true);
   useEffect(() => {
-    end.current?.scrollIntoView({ block: 'end' });
-  }, [data?.messages.length]);
+    end.current?.scrollIntoView({ block: 'end', behavior: first.current ? 'auto' : 'smooth' });
+    if (count) first.current = false;
+  }, [count]);
   if (isError) return <ErrorNote what="this chat" />;
   if (!data) return <p className="p-5 text-muted">Loading…</p>;
   const { contact: c, messages } = data;
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (!text.trim()) return;
-    await send({ id, text: text.trim() }).unwrap();
-    setText('');
+    const body = text.trim();
+    if (!body) return;
+    setText(''); // like WhatsApp: the box clears and the bubble appears at once
+    setFailed(null);
+    try {
+      await send({ id, text: body }).unwrap();
+    } catch {
+      setFailed(body);
+      setText((t) => t || body); // give the text back so nothing is lost
+    }
   }
   return (
     <div className="flex h-[72vh] min-h-[480px] flex-col">
@@ -66,11 +77,14 @@ function Thread({ id }: { id: string }) {
       </header>
       <div className="flex-1 space-y-2 overflow-y-auto bg-canvas p-4">
         {messages.map((m) => (
-          <div key={m.id} className={`flex ${m.direction === 'out' ? 'justify-end' : 'justify-start'}`}>
+          <div key={m.id} className={`flex ${m.direction === 'out' ? 'justify-end' : 'justify-start'} ${m.pending ? 'opacity-80' : ''}`}>
             <div className={`max-w-[80%] rounded-2xl px-3.5 py-2 text-sm ${m.direction === 'in' ? 'border border-line bg-white' : m.sentBy === 'human' ? 'bg-navy text-white' : 'bg-brand text-white'}`}>
               {m.type !== 'text' && m.media && <div className="mb-1"><MediaPreview type={m.type as 'image' | 'document'} media={m.media} fileName={m.body} dark={m.direction === 'out'} /></div>}
               {(m.type === 'text' || m.type === 'image') && m.body && <p className="whitespace-pre-wrap">{m.body}</p>}
-              <p className={`mt-1 text-[11px] ${m.direction === 'in' ? 'text-muted' : 'text-white/80'}`}>{m.direction === 'out' ? `${SENT_BY[m.sentBy] ?? m.sentBy} · ` : ''}{timeAgo(m.createdAt)}</p>
+              <p className={`mt-1 flex items-center gap-1 text-[11px] ${m.direction === 'in' ? 'text-muted' : 'text-white/80'}`}>
+                {m.direction === 'out' ? `${SENT_BY[m.sentBy] ?? m.sentBy} · ` : ''}{m.pending ? 'Sending…' : timeAgo(m.createdAt)}
+                {m.direction === 'out' && (m.pending ? <Clock className="h-3 w-3" aria-label="Sending" /> : <CheckCheck className="h-3.5 w-3.5" aria-label="Sent" />)}
+              </p>
             </div>
           </div>
         ))}
@@ -80,9 +94,9 @@ function Thread({ id }: { id: string }) {
         <div className="flex gap-2">
           <label htmlFor="reply" className="sr-only">Reply</label>
           <input id="reply" className="input" value={text} maxLength={4096} onChange={(e) => setText(e.target.value)} placeholder="Type a reply" />
-          <button className="btn-primary" disabled={sending || !text.trim()}>Send</button>
+          <button className="btn-primary" disabled={!text.trim()}>Send</button>
         </div>
-        {error && <p className="mt-2 text-sm text-err">Not sent. Is this number still connected? Check WhatsApp numbers.</p>}
+        {failed && <p className="mt-2 text-sm text-err" role="alert">Not sent. Is this number still connected? Check WhatsApp numbers, then press Send again.</p>}
         <p className="mt-2 text-xs text-muted">{c.botPaused ? 'The bot is paused for this person. Click “You are replying” to hand the chat back to the bot.' : 'Sending a reply pauses the bot for this person so it doesn’t interrupt you.'}</p>
       </form>
     </div>
